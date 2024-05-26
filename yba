@@ -7,17 +7,19 @@ getgenv().WoUStuff = {
      farm = false,
      farmdistance = 4,
      mob = nil,
+     autorun = false,
      autosave = false,
+     standfarm = false,
+     stands = {},
      esp = false,
-     espcolor = Color3.new(1,0,0),
-     autorj = false,
+     espcolor = Color3.new(1,0,0)
 }
 local ply = game.Players.LocalPlayer
 local queue_on_teleport = queue_on_teleport or syn and syn.queue_on_teleport or fluxus and fluxus.queue_on_teleport
 local httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 local mainfolder = "W.o.U's Custom Folder"
 local uiconfigs = "W.o.U's Custom Folder//"..'UI Configs'
-local gamename = "A Hero's Destiny"
+local gamename = 'Yba scrip'
 local gamespecific = "W.o.U's Custom Folder//"..'UI Configs//'..game.Players.LocalPlayer.Name.."_"..gamename.."_".."autosave.json"
 function decode(stuff)
      return game:GetService('HttpService'):JSONDecode(stuff)
@@ -75,6 +77,7 @@ function isalivecheck()
           return false
      end
 end
+
 function nc(val)
      local newvel = Instance.new('BodyVelocity')
      newvel.Name = 'idkkkk'
@@ -84,7 +87,7 @@ function nc(val)
                if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
                     newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
                end
-          elseif not val or val == nil then
+          elseif not val or val == nil and ply.Character then
                for i,v in next,ply.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
                     if v.Name == newvel.Name then
                          v:Destroy()
@@ -95,13 +98,13 @@ function nc(val)
 end
 function returndist(part)
      local dist
-     if ply.Character ~= nil then
+     if isalivecheck() then
           dist = (ply.Character:WaitForChild('HumanoidRootPart').Position-part.Position).Magnitude
      end
      return dist
 end
 function tp(place)
-     if ply.Character then 
+     if isalivecheck() then
           ply.Character:WaitForChild('HumanoidRootPart').Position = place.Position
      end
 end
@@ -119,7 +122,7 @@ end
 function tpsafe(place,s,div)
      if isalivecheck() then
           local speed = s or 0
-          local count = div or 10
+          local count = div or 15
           local amt = generateNumbers(count)
           local start = ply.Character:WaitForChild('HumanoidRootPart').Position
           local endPos = place.Position
@@ -234,11 +237,6 @@ end
 function rejoin()
      game:GetService'TeleportService'.TeleportToPlaceInstance(game.PlaceId,game.JobId,ply)
 end
-game.Players.PlayerRemoving:Connect(function(player)
-     if player == ply and WoUStuff.autorj then
-          rejoin()
-     end
-end)
 function send(what,where)
      httprequest({
           Url = where,
@@ -251,27 +249,227 @@ function send(what,where)
           })
      })
 end
+function returnxymouse(button)
+     local vals
+     local xx = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
+     local yy = button.AbsolutePosition.Y + 50
+     vals = Vector2.new(xx,yy)
+     return vals
+end
 -- code here
-function getmobs()
-     local mobs = {}
-     for i,v in next,workspace.Spawns:GetChildren() do
-          if not table.find(mobs,v.Name) then
-               table.insert(mobs,v.Name)
+local items = {
+     ["Mysterious Arrow"] = 25,
+     ["Rokakaka"] = 25,
+     ["Pure Rokakaka"] = 10,
+     ["Lucky Arrow"] = 10,
+     ["Lucky Stone Mask"] = 10,
+     ["Rib Cage of The Saint's Corpse"] = 10,
+     ["Steel Ball"] = 10,
+     ["Zeppelin's Headband"] = 10,
+     ["Ancient Scroll"] = 10,
+     ["Quinton's Glove"] = 10,
+     ["Stone Mask"] = 10,
+     ["Gold Coin"] = 45,
+     ["Diamond"] = 30,
+     ["Dio's Diary"] = 10
+}
+function gp()
+     if game:GetService('MarketplaceService'):UserOwnsGamePassAsync(ply.UserId,14597778) then
+          for i,v in next,items do
+               v = v * 2
           end
      end
-     return mobs
 end
-function getclosemob()
-     local found,far = nil,math.huge
-     for i,v in next,workspace.Spawns:GetChildren() do
-          if table.find(WoUStuff.mob,v.Name) then
-               if returndist(v)<far then
-                    far = returndist(v)
-                    found = v:FindFirstChildWhichIsA('Model')
+function check(item)
+     local ts = {}
+     local idk
+     if isalivecheck() ~= nil then
+          for i,v in next,ply.Backpack:GetChildren() do
+               if v.Name == tostring(item) then
+                    table.insert(ts,v)
+               end
+          end
+          for i,v in next,items do
+               if string.match(i,item) then
+                    if #ts>=v then
+                         idk = false
+                    elseif #ts<v then
+                         idk = true
+                    end
+                    break
                end
           end
      end
-     return found
+     return idk
+end
+function getcheckeditems()
+     local stuff = {}
+     for i,v in next,game:GetService("ReplicatedStorage").Tool_Replicas:GetChildren() do
+          table.insert(stuff,v.Name)
+     end
+     return stuff
+end
+function getitems()
+     local b = {}
+     for i,v in next,workspace.Item_Spawns.Items:GetChildren() do
+          if table.find(getcheckeditems(),v:FindFirstChildOfClass('ProximityPrompt').ObjectText) then
+               for i2,v2 in next,v:GetChildren() do
+                    if string.match(v2.ClassName,'Part') then
+                         if v2.Transparency ~= 1 then
+                              table.insert(b,v)
+                         end
+                    end
+               end
+          end
+     end
+     return b
+end
+function getcloseitem()
+     local item
+     local far = math.huge
+     for i,v in next,getitems() do
+          if isalivecheck() ~= nil then
+               if table.find(WoUStuff.mob,v:FindFirstChild('ProximityPrompt').ObjectText) then
+                    if check(v:FindFirstChild('ProximityPrompt').ObjectText) then
+                         local distance = (ply.Character:WaitForChild('HumanoidRootPart').Position - v.WorldPivot.Position).Magnitude
+                         if distance < far then
+                              item = v
+                              far = distance
+                         end
+                    end
+               end
+          end
+     end
+     return item
+end
+function clickprox(prox)
+     for i,v in next,prox:GetChildren() do
+          if v.ClassName == 'ProximityPrompt' and v.Enabled then
+               fireproximityprompt(v)
+          end
+     end
+end
+function getrunstatus()
+     local sprinting
+     if isalivecheck() then
+          if ply.Character:GetAttribute('Sprinting') == nil then
+               ply.Character:SetAttribute('Sprinting',false)
+          else
+               sprinting = ply.Character:GetAttribute('Sprinting')
+          end
+     end
+     return sprinting
+end
+function getstands()
+     local stands = {}
+     local standsplace = game:GetService("ReplicatedStorage").Stands
+     for i,v in next,standsplace:GetChildren() do
+          table.insert(stands,v.Name)
+     end
+     return stands
+end
+function grabroka()
+     if isalivecheck() then
+          for i,v in next,ply.Backpack:GetChildren() do
+               if v.Name == 'Rokakaka' then 
+                    if not ply.Character:FindFirstChild(v.Name) then
+                         ply.Character:WaitForChild('Humanoid'):EquipTool(v)
+                    end
+               end
+          end
+          game:GetService('VirtualInputManager'):SendMouseButtonEvent(688.9,382.2,0,true,game,0)
+          task.wait(0.5)
+          game:GetService('VirtualInputManager'):SendMouseButtonEvent(688.9,382.2,0,false,game,0)
+     end
+end
+function grabarrow()
+     if isalivecheck() then
+          for i,v in next,ply.Backpack:GetChildren() do
+               if v.Name == 'Mysterious Arrow' then
+                    if not ply.Character:FindFirstChild(v.Name) then
+                         if isalivecheck() then
+                              ply.Character:WaitForChild('Humanoid'):EquipTool(v)
+                         end
+                    end
+               end
+          end
+          game:GetService('VirtualInputManager'):SendMouseButtonEvent(688.9,382.2,0,true,game,0)
+          task.wait(0.5)
+          game:GetService('VirtualInputManager'):SendMouseButtonEvent(688.9,382.2,0,false,game,0)
+     end
+end
+function getrokas()
+     local amt = {}
+     if isalivecheck() then
+          for i,v in next,ply.Backpack:GetChildren() do
+               if v.Name == 'Rokakaka' then
+                    table.insert(amt,v)
+               end
+          end
+          for i,v in next,ply.Character:GetChildren() do
+               if v.Name == 'Rokakaka' then
+                    table.insert(amt,v)
+               end
+          end 
+     end
+     return amt
+end
+function getarrows()
+     local amt = {}
+     if isalivecheck() then
+          for i,v in next,ply.Backpack:GetChildren() do
+               if v.Name == 'Mysterious Arrow' then
+                    table.insert(amt,v)
+               end
+          end
+          for i,v in next,ply.Character:GetChildren() do
+               if v.Name == 'Mysterious Arrow' then
+                    table.insert(amt,v)
+               end
+          end
+     end
+     return amt
+end
+function getplayerstand()
+     local exists,stand = pcall(function()
+          return game:GetService("Players").LocalPlayer.PlayerStats.Stand.Value
+     end)
+     if exists then
+          return stand
+     end
+end
+function getplayerworth()
+     local exists,hasworth3 = pcall(function()
+          return game:GetService("Players").LocalPlayer.CharacterSkillTree["Worthiness III"].Value
+     end)
+     if exists then
+          return hasworth3
+     end
+end
+local has = false
+local play
+spawn(function()
+     while true and task.wait() do
+          if isalivecheck() then
+               if not has then
+                    local Runanim = game:GetService("ReplicatedStorage").Anims.Run
+                    play = ply.Character:WaitForChild('Humanoid'):LoadAnimation(Runanim)
+                    has = true
+               end
+          elseif not isalivecheck() then
+               has = false
+          end
+     end
+end)
+
+local once = false
+function returnyesbutton()
+     local exists,button = pcall(function()
+          return game:GetService("Players").LocalPlayer.PlayerGui.DialogueGui.Frame.Options.Option1.TextButton
+     end)
+     if exists then
+          return button
+     end
 end
 --ui
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/caydenthekile/scriptsv2/main/FavUiV3/source"))()
@@ -283,21 +481,49 @@ local Window = Library:CreateWindow({
 })
 local main = Window:AddTab('Main')
 local uisettings = Window:AddTab('Settings')
-local LeftGroupBox = main:AddLeftGroupbox('Left Main')
-local rightgroupbox = main:AddRightGroupbox('Right Main')
-LeftGroupBox:AddToggle('FarmToggle', {Text = 'Farm',Default = WoUStuff.farm,
+local LeftGroupBox = main:AddLeftGroupbox('Item Farm')
+local rightgroupbox = main:AddRightGroupbox('Stand Sniper')
+local miscbox = main:AddRightGroupbox('Misc')
+LeftGroupBox:AddToggle('FarmToggle', {Text = 'Item farm',Default = WoUStuff.farm,
 Callback = function(value)
      WoUStuff.farm = value
      spawn(function()
           while WoUStuff.farm and task.wait() do
-               local mob = getclosemob()
                if isalivecheck() then
-                    ply.Character:WaitForChild('HumanoidRootPart').CFrame = mob:WaitForChild('HumanoidRootPart').CFrame * CFrame.new(0,WoUStuff.farmdistance,0)
+                    local item = getcloseitem()
+                    if not once then
+                         play:Play()
+                         once = true
+                    end
+                    if item then
+                         local dist = (ply.Character:WaitForChild('HumanoidRootPart').Position - item.WorldPivot.Position).Magnitude
+                         if dist > 5 then
+                              tpsafe(item.WorldPivot,0,50)
+                              task.wait(2)
+                         else
+                              clickprox(getcloseitem())
+                              wait(2)
+                         end
+                    end
                end
+          end
+          if once then
+               play:Stop()
+               once = false
           end
      end)
 end})
-LeftGroupBox:AddDropdown('MobDropdown',{Values = getmobs(),WoUStuff.mob,AllowNull = true,Multi = true, Text = 'Select Mob',
+spawn(function()
+     while true and task.wait() do
+          if WoUStuff.farm and ply.Character then
+               nc(true)
+          elseif not WoUStuff.farm then
+               nc(false)
+          end
+     end
+end)
+LeftGroupBox:AddLabel("Some items inside the dropdown don't exist",true)
+LeftGroupBox:AddDropdown('MobDropdown',{Values = getcheckeditems(),Default = WoUStuff.mob,AllowNull = true,Multi = true, Text = 'Items to Farm',
 Callback = function(value)
      local vals = {}
      for i,v in next,value do
@@ -307,9 +533,89 @@ Callback = function(value)
      end
      WoUStuff.mob = vals
 end})
-LeftGroupBox:AddSlider('FarmSlider',{Text = 'Farm Distance',Default = 0,Min = 0,Max = 5,Rounding = 1,Compact = false,
+rightgroupbox:AddToggle('StandFarmToggle', {Text = 'Stand Farm',Default = WoUStuff.standfarm,
 Callback = function(value)
-     WoUStuff.farmdistance = value
+     WoUStuff.standfarm = value
+     spawn(function()
+          while WoUStuff.standfarm and task.wait() do
+               if isalivecheck() then
+                    if getplayestand() == 'None' then
+                         if not getplayerworth() then
+                              game:GetService("Players").LocalPlayer.Character.RemoteFunction:InvokeServer("LearnSkill",{["Skill"] = "Worthiness III",["SkillTreeType"] = "Character"})
+                         elseif getplayerworth() then
+                              if #getarrows() > 0 then
+                                   while true and task.wait() do
+                                        grabarrow()
+                                        if getplayerstand() ~= 'None' then
+                                             break
+                                        end
+                                        if not WoUStuff.standfarm then
+                                             break
+                                        end
+                                   end
+                              else
+                                   Library:Notify('No Arrows',5)
+                                   Toggles.StandFarmToggle:SetValue(false)
+                                   break
+                              end
+                         end
+                    elseif getplayerstand() ~= 'None' then
+                         local wanted = false
+                         for i,v in next,WoUStuff.stands do
+                              if string.match(getplayerstand(),v) then
+                                   wanted = true
+                              end
+                         end
+                         if #getrokas() > 0 and not wanted then
+                              while true and task.wait() do
+                                   grabroka()
+                                   if getplayerstand() == 'None' then
+                                        break
+                                   end
+                                   if not WoUStuff.standfarm then
+                                        break
+                                   end
+                              end
+                              task.wait(2)
+                         else
+                              if #getrokas() <= 0 then
+                                   Library:Notify('No Rokas',5)
+                                   Toggles.StandFarmToggle:SetValue(false)
+                                   break
+                              elseif wanted then
+                                   Library:Notify('Found wanted stand',5)
+                                   Toggles.StandFarmToggle:SetValue(false)
+                                   break
+                              end
+                         end
+                    end
+               end
+          end
+     end)
+end})
+rightgroupbox:AddLabel("Some Stands inside the dropdown don't exist",true)
+rightgroupbox:AddDropdown('StandDropdown',{Values = getstands(),Default = WoUStuff.stands,AllowNull = true,Multi = true, Text = 'Stands to go for',
+Callback = function(value)
+     local vals = {}
+     for i,v in next,value do
+         if v == true then
+             table.insert(vals,i)
+         end
+     end
+     WoUStuff.stands = vals
+end})
+miscbox:AddToggle('RunToggle', {Text = 'Auto Run',Default = WoUStuff.autorun,
+Callback = function(value)
+     WoUStuff.autorun = value
+     spawn(function()
+          while WoUStuff.autorun and task.wait() do
+               if isalivecheck() then
+                    if not getrunstatus() then
+                         ply.Character:WaitForChild('RemoteFunction'):InvokeServer('ToggleSprinting')
+                    end
+               end
+          end
+     end)
 end})
 Library:OnUnload(function()
     Library.Unloaded = true
@@ -344,11 +650,8 @@ Callback = function(value)
           end
      end)
 end})
-MenuGroupRight:AddToggle('RejoinToggle', {Text = 'Auto Rejoin game',Default = WoUStuff.autorj,Tooltip = "Doesn't work for private servers",
-Callback = function(value)
-     WoUStuff.autorj = value
-end})
 MenuGroupLeft:AddButton('Unload',function()
      Library:Unload()
 end)
-Library.ToggleKeybind = MenuGroupLeft:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {Default = 'LeftControl', NoUI = true, Text = 'Menu keybind' })
+MenuGroupLeft:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {Default = 'LeftControl', NoUI = true, Text = 'Menu keybind' })
+Library.ToggleKeybind = Options.MenuKeybind
