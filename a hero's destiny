@@ -1,0 +1,478 @@
+while true and task.wait() do
+     if game:IsLoaded() then
+          break
+     end
+end
+getgenv().WoUStuff = {
+     farm = false,
+     farmdistance = 4,
+     mob = nil,
+     autosave = false,
+     esp = false,
+     espcolor = Color3.new(1,0,0),
+     skills = {},
+     earthclasses = nil,
+     earthspin = false,
+     spin = false,
+     classes = nil,
+     autorj = false,
+}
+local ply = game.Players.LocalPlayer
+local queue_on_teleport = queue_on_teleport or syn and syn.queue_on_teleport or fluxus and fluxus.queue_on_teleport
+local httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+local mainfolder = "W.o.U's Custom Folder"
+local uiconfigs = "W.o.U's Custom Folder//"..'UI Configs'
+local gamename = "A Hero's Destiny"
+local gamespecific = "W.o.U's Custom Folder//"..'UI Configs//'..game.Players.LocalPlayer.Name.."_"..gamename.."_".."autosave.json"
+function decode(stuff)
+     return game:GetService('HttpService'):JSONDecode(stuff)
+end
+function encode(stuff)
+     return game:GetService('HttpService'):JSONEncode(stuff)
+end
+function g(folder)
+     local amt = {}
+     for i,v in next,folder do
+          table.insert(amt,v)
+     end
+     return amt
+end
+if not isfolder(mainfolder) then
+     makefolder(mainfolder)
+end
+if not isfolder(uiconfigs) then
+     makefolder(uiconfigs)
+end
+if not isfile(gamespecific) then
+     writefile(gamespecific,encode(WoUStuff))
+end
+local decoded = decode(readfile(gamespecific))
+if #g(WoUStuff) > #g(decoded) then
+     local grabbed = decoded
+     for i,v in next,WoUStuff do
+          if not decoded[i] then
+               grabbed[i] = v
+               writefile(gamespecific,encode(grabbed))
+          end
+     end
+     for i,v in next,decoded do
+          WoUStuff[i] = v
+     end
+else
+     for i,v in next,decoded do
+          WoUStuff[i] = v
+     end
+end
+for i,v in next,getconnections(ply.Idled) do
+     v:Disable()
+end
+function isalivecheck()
+     local exists,part = pcall(function()
+          return ply.Character.Humanoid
+     end)
+     if exists then
+          if part.Health>0 then
+               return true
+          else
+               return false
+          end
+     else
+          return false
+     end
+end
+function nc(val)
+     local newvel = Instance.new('BodyVelocity')
+     newvel.Name = 'idkkkk'
+     newvel.Velocity = Vector3.new(0,0,0)
+     if isalivecheck() then
+          if val then
+               if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
+                    newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
+               end
+          elseif not val or val == nil then
+               for i,v in next,ply.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
+                    if v.Name == newvel.Name then
+                         v:Destroy()
+                    end
+               end
+          end
+     end
+end
+function returndist(part)
+     local dist
+     if ply.Character ~= nil then
+          dist = (ply.Character:WaitForChild('HumanoidRootPart').Position-part.Position).Magnitude
+     end
+     return dist
+end
+function tp(place)
+     if ply.Character then 
+          ply.Character:WaitForChild('HumanoidRootPart').Position = place.Position
+     end
+end
+function generateNumbers(count)
+     local numbers = {}
+     local interval = 1 / (count - 1)  -- Adjusted to exclude zero
+     for i = 0, count - 1 do
+         local number = interval * i
+          if number ~= 0 then
+               table.insert(numbers, number)
+          end
+     end
+     return numbers
+end
+function tpsafe(place,s,div)
+     if isalivecheck() then
+          local speed = s or 0
+          local count = div or 10
+          local amt = generateNumbers(count)
+          local start = ply.Character:WaitForChild('HumanoidRootPart').Position
+          local endPos = place.Position
+          local totalDistance = (endPos - start).Magnitude
+          for i, v in ipairs(amt) do
+               local spot
+               if i == 1 then
+                    spot = start
+               else
+                    spot = start:Lerp(endPos, v)
+               end
+               nc(true)
+               ply.Character:WaitForChild('HumanoidRootPart').CFrame = CFrame.new(spot)
+               wait(speed)
+               local currentDistance = (spot - start).Magnitude
+               if currentDistance >= totalDistance then
+                    break
+               end
+          end
+     end
+end
+local esptable = {}
+function espadd(item)
+     if item.ClassName == 'Model' then
+          local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - item:FindFirstChildWhichIsA('Part').Position).Magnitude
+          local spot = workspace.CurrentCamera:WorldToViewportPoint(item:FindFirstChildWhichIsA('Part').Position)
+          local esp = {item}
+          esp.name = Drawing.new('Text')
+          esp.distance = Drawing.new('Text')
+          esp.name.Text = tostring(item)
+          esp.name.Position = Vector2.new(spot.X-35,spot.Y)
+          esp.name.Visible = WoUStuff.esp
+          esp.name.Color = WoUStuff.espcolor
+          esp.distance.Text = math.round(dist)
+          esp.distance.Position = Vector2.new(spot.X-5,spot.Y+10)
+          esp.distance.Visible = WoUStuff.esp
+          esp.distance.Color = WoUStuff.espcolor
+          table.insert(esptable,esp)
+     elseif item.ClassName == 'Part' then
+          local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - item.Position).Magnitude
+          local spot = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
+          local esp = {item}
+          esp.name = Drawing.new('Text')
+          esp.distance = Drawing.new('Text')
+          esp.name.Text = tostring(item)
+          esp.name.Position = Vector2.new(spot.X-35,spot.Y)
+          esp.name.Visible = WoUStuff.esp
+          esp.name.Color = WoUStuff.espcolor
+
+          esp.distance.Text = math.round(dist)
+          esp.distance.Position = Vector2.new(spot.X-5,spot.Y+10)
+          esp.distance.Visible = WoUStuff.esp
+          esp.distance.Color = WoUStuff.espcolor
+          table.insert(esptable,esp)
+     end
+end
+function updateesp()
+     for i,v in next,esptable do
+          local spott = v[1]
+          if spott.ClassName == 'Model' then
+               local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - spott:FindFirstChildWhichIsA('Part').Position).Magnitude
+               local spot,vis = workspace.CurrentCamera:WorldToScreenPoint(spott:FindFirstChildWhichIsA('Part').Position)
+               if not vis then
+                    setrenderproperty(v.name,'Visible',false)
+                    setrenderproperty(v.distance,'Visible',false)
+               elseif vis then
+                    setrenderproperty(v.name,'Position',Vector2.new(spot.X-35,spot.Y))
+                    setrenderproperty(v.name,'Visible',WoUStuff.esp)
+                    setrenderproperty(v.name,'Color',WoUStuff.espcolor)
+                    setrenderproperty(v.distance,'Position',Vector2.new(spot.X-5,spot.Y+10))
+                    setrenderproperty(v.distance,'Text',math.round(dist))
+                    setrenderproperty(v.distance,'Visible',WoUStuff.esp)
+                    setrenderproperty(v.distance,'Color',WoUStuff.espcolor)
+               end
+          elseif spott.ClassName == 'Part' then
+               local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - spott.Position).Magnitude
+               local spot,vis = workspace.CurrentCamera:WorldToScreenPoint(spott.Position)
+               if not vis then
+                    setrenderproperty(v.name,'Visible',false)
+                    setrenderproperty(v.distance,'Visible',false)
+               elseif vis then
+                    setrenderproperty(v.name,'Position',Vector2.new(spot.X-35,spot.Y))
+                    setrenderproperty(v.name,'Visible',WoUStuff.esp)
+                    setrenderproperty(v.name,'Color',WoUStuff.espcolor)
+                    setrenderproperty(v.distance,'Position',Vector2.new(spot.X-5,spot.Y+10))
+                    setrenderproperty(v.distance,'Text',math.round(dist))
+                    setrenderproperty(v.distance,'Visible',WoUStuff.esp)
+                    setrenderproperty(v.distance,'Color',WoUStuff.espcolor)
+               end
+          end
+     end
+end
+function serverhop()
+     if httprequest then
+          local servers = {}
+          local req = httprequest({Url = string.format("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100", game.placeId)})
+          local body = game:GetService'HttpService':JSONDecode(req.Body)
+          if body and body.data then
+               for _, v in next, body.data do
+                    if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.id ~= game.JobId then
+                         table.insert(servers,1,v.id)
+                    end
+               end
+          end
+          if #servers > 0 then
+               game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servers[math.random(1,#servers)], game.Players.LocalPlayer)
+          else
+               print('failed')
+          end
+     end
+end
+function rejoin()
+     game:GetService'TeleportService'.TeleportToPlaceInstance(game.PlaceId,game.JobId,ply)
+end
+game.Players.PlayerRemoving:Connect(function(player)
+     if player == ply and WoUStuff.autorj then
+          rejoin()
+     end
+end)
+function send(what,where)
+     httprequest({
+          Url = where,
+          Method = "POST",
+          Headers = {
+               ["Content-Type"] = "application/json"
+          },
+          Body = game:GetService("HttpService"):JSONEncode({
+               ["content"] = what
+          })
+     })
+end
+-- code here
+function getmobs()
+     local mobs = {}
+     for i,v in next,workspace.Spawns:GetChildren() do
+          if not table.find(mobs,v.Name) then
+               table.insert(mobs,v.Name)
+          end
+     end
+     return mobs
+end
+function getclosemob()
+     local found,far = nil,math.huge
+     for i,v in next,workspace.Spawns:GetChildren() do
+          if table.find(WoUStuff.mob,v.Name) then
+               if v:FindFirstChildWhichIsA('Model') then
+                    if returndist(v)<far then
+                         far = returndist(v)
+                         found = v:FindFirstChildWhichIsA('Model')
+                    end
+               end
+          end
+     end
+     return found
+end
+local scriptt = require(game:GetService("ReplicatedStorage").Modules.Quests)
+local scrip = require(game:GetService("ReplicatedStorage").Modules.AscendantQuests)
+local Quests = {}
+for i,v in next,scriptt do
+     Quests[v.Target] = i
+end
+for i,v in next,scrip do
+     Quests[v.Target] = i
+end
+function getquest(mob)
+     for i,v in next,Quests do
+          if string.match(i,tostring(mob)) then
+               game:GetService("ReplicatedStorage").RemoteEvent:FireServer('GetQuest',v)
+          end
+     end
+end
+function setmouse(mob)
+     local place = workspace.CurrentCamera:WorldToViewportPoint(mob.Position)
+     game:GetService('VirtualInputManager'):SendMouseMoveEvent(place.X,place.Y,game)
+end
+
+local place = require(game:GetService("ReplicatedStorage").Modules.Classes)
+function getearthclasses()
+     local classes = {}
+     for i,v in next,place.Normal do
+          table.insert(classes,tostring(v.Item))
+     end
+     return classes
+end
+function getclasses()
+     local classes = {}
+     for i,v in next,place.AscendantNormal do
+          table.insert(classes,tostring(v.Item))
+     end
+     return classes
+end
+function mode()
+     if not string.match(workspace.bruhneedalt.Form.Value,game:GetService("Players").LocalPlayer.Stats.Class.Value) and isalivecheck() then
+          game:GetService('VirtualInputManager'):SendKeyEvent(true,"G",false,game)
+     end
+end
+--ui
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/caydenthekile/scriptsv2/main/FavUiV3/source"))()
+local Window = Library:CreateWindow({
+    Title = 'W.o.U',
+    Center = true,
+    AutoShow = true,
+    Size = UDim2.fromOffset(500, 400)
+})
+local main = Window:AddTab('Main')
+local uisettings = Window:AddTab('Settings')
+local LeftGroupBox = main:AddLeftGroupbox('Farm')
+local rightgroupbox = main:AddRightGroupbox('Class Stuff')
+LeftGroupBox:AddToggle('FarmToggle', {Text = 'Farm',Default = WoUStuff.farm,
+Callback = function(value)
+     WoUStuff.farm = value
+     spawn(function()
+          while WoUStuff.farm and task.wait() do
+               local mob = getclosemob()
+               if isalivecheck() and mob then
+                    mode()
+                    getquest(mob)
+                    ply.Character:WaitForChild('HumanoidRootPart').CFrame = mob:WaitForChild('HumanoidRootPart').CFrame * CFrame.new(0,WoUStuff.farmdistance,0) * CFrame.Angles(4.7,0,0)
+               end
+          end
+     end)
+     spawn(function()
+          while WoUStuff.farm and task.wait() do
+               local mob = getclosemob()
+               if isalivecheck() and mob then
+                    setmouse(mob:WaitForChild('HumanoidRootPart'))
+                    for i,v in next,WoUStuff.skills do
+                         game:GetService('VirtualInputManager'):SendKeyEvent(true,v,false,game)
+                    end
+               end
+          end
+     end)
+end})
+LeftGroupBox:AddDropdown('MobDropdown',{Values = getmobs(),Default = WoUStuff.mob,AllowNull = true,Multi = true, Text = 'Select Mob',
+Callback = function(value)
+     local vals = {}
+     for i,v in next,value do
+         if v == true then
+             table.insert(vals,i)
+         end
+     end
+     WoUStuff.mob = vals
+end})
+LeftGroupBox:AddDropdown('SkillDropdown',{Values = {'E','R','C','F'},Default = WoUStuff.skills,AllowNull = true,Multi = true, Text = 'Select Skills',
+Callback = function(value)
+     local vals = {}
+     for i,v in next,value do
+         if v == true then
+             table.insert(vals,i)
+         end
+     end
+     WoUStuff.skills = vals
+end})
+LeftGroupBox:AddSlider('FarmSlider',{Text = 'Farm Distance',Default = WoUStuff.farmdistance,Min = 0,Max = 100,Rounding = 1,Compact = false,
+Callback = function(value)
+     WoUStuff.farmdistance = value
+end})
+rightgroupbox:AddToggle('EarthSpinToggle', {Text = 'Auto Spin for Earth classes',Default = WoUStuff.earthspin,
+Callback = function(value)
+     WoUStuff.earthspin = value
+     spawn(function()
+          while WoUStuff.earthspin and task.wait() do
+               local class = game:GetService("Players").LocalPlayer.Stats.Class.Value
+               if type(WoUStuff.earthclasses) == "table" then
+                    if not table.find(WoUStuff.earthclasses,class) then
+                         game:GetService("ReplicatedStorage").RemoteFunction:InvokeServer()
+                    end
+               else
+                    Library:Notify('Select Some Classes',5)
+               end
+          end
+     end)
+end})
+rightgroupbox:AddDropdown('earthClassDropdown',{Values = getearthclasses(),Default = WoUStuff.earthclasses,AllowNull = true,Multi = true, Text = 'Select Class',
+Callback = function(value)
+     local vals = {}
+     for i,v in next,value do
+         if v == true then
+             table.insert(vals,i)
+         end
+     end
+     WoUStuff.earthclasses = vals
+end})
+rightgroupbox:AddToggle('SpinToggle', {Text = 'Auto Spin for Asc classes',Default = WoUStuff.spin,
+Callback = function(value)
+     WoUStuff.spin = value
+     spawn(function()
+          while WoUStuff.spin and task.wait() do
+               local class = game:GetService("Players").LocalPlayer.Stats.Class.Value
+               if type(WoUStuff.classes) == "table" then
+                    if not table.find(WoUStuff.classes,class) then
+                         game:GetService("ReplicatedStorage").RemoteFunction:InvokeServer("Ascendant")
+                    end
+               else
+                    Library:Notify('Select Some Classes',5)
+               end
+          end
+     end)
+end})
+rightgroupbox:AddDropdown('ClassDropdown',{Values = getclasses(),Default = WoUStuff.classes,AllowNull = true,Multi = true, Text = 'Select Class',
+Callback = function(value)
+     local vals = {}
+     for i,v in next,value do
+         if v == true then
+             table.insert(vals,i)
+         end
+     end
+     WoUStuff.classes = vals
+end})
+Library:OnUnload(function()
+    Library.Unloaded = true
+end)
+local MenuGroupLeft = uisettings:AddLeftGroupbox('Menu Settings')
+local MenuGroupRight = uisettings:AddRightGroupbox('Script Settings')
+MenuGroupRight:AddButton({Text = "Join My Discord",Tooltip = 'Copies and http join',
+Func = function()
+     setclipboard("https://discord.gg/u3WAkxKzKb")
+     httprequest({
+          Url = "http://127.0.0.1:6463/rpc?v=1",
+          Method = "POST",
+          Headers = {
+               ["Content-Type"] = "application/json",
+               ["origin"] = "https://discord.com",
+          },
+          Body = game:GetService("HttpService"):JSONEncode({
+               ["args"] = {
+                    ["code"] = "u3WAkxKzKb",
+               },
+               ["cmd"] = "INVITE_BROWSER",
+               ["nonce"] = "."
+          })
+     })
+end});
+MenuGroupRight:AddToggle('SaveToggle', {Text = 'Auto Save Settings',Default = WoUStuff.autosave,
+Callback = function(value)
+     WoUStuff.autosave = value
+     spawn(function()
+          while WoUStuff.autosave and task.wait() do
+               writefile(gamespecific,encode(WoUStuff))
+          end
+     end)
+end})
+MenuGroupRight:AddToggle('RejoinToggle', {Text = 'Auto Rejoin game',Default = WoUStuff.autorj,Tooltip = "Doesn't work for private servers",
+Callback = function(value)
+     WoUStuff.autorj = value
+end})
+MenuGroupLeft:AddButton('Unload',function()
+     Library:Unload()
+end)
+MenuGroupLeft:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {Default = 'LeftControl', NoUI = true, Text = 'Menu keybind' })
+Library.ToggleKeybind = Options.MenuKeybind
