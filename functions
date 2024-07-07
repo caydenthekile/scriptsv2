@@ -1,4 +1,4 @@
-local funcs = {
+getgenv().funcs = {
      isalivecheck = function()
          local exists, part = pcall(function()
              return ply.Character.Humanoid
