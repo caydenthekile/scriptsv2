@@ -1,4 +1,4 @@
-function scriptt(key)
+local scriptt = function(key)
      if key == "yesss" then
           while true and task.wait() do
                if game:IsLoaded() then
@@ -367,7 +367,7 @@ function scriptt(key)
           end
           threads.rjthread = task.spawn(function()
                while true and task.wait() do
-                    if ply.Parent then
+                    if not ply.Parent then
                          rj()
                     end
                end
