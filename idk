@@ -1,4 +1,5 @@
-local scriptt = function(key)
+local secrets = {}
+secrets.scriptt = function(key)
      if key == "yesss" then
           while true and task.wait() do
                if game:IsLoaded() then
@@ -476,4 +477,4 @@ local scriptt = function(key)
           Library.ToggleKeybind = Options.MenuKeybind
      end
 end
-return scriptt
+return secrets
