@@ -235,4 +235,3 @@ getgenv().funcs = {
           })
      end
 }
-return funcs
