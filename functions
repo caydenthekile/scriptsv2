@@ -1,4 +1,4 @@
-local functions = {
+local funcs = {
      isalivecheck = function()
          local exists, part = pcall(function()
              return ply.Character.Humanoid
@@ -18,7 +18,7 @@ local functions = {
          local newvel = Instance.new('BodyVelocity')
          newvel.Name = 'idkkkk'
          newvel.Velocity = Vector3.new(0, 0, 0)
-         if functions.isalivecheck() then
+         if funcs.isalivecheck() then
              if val then
                  if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
                      newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
@@ -60,10 +60,10 @@ local functions = {
      end,
  
      tpsafe = function(place, s, div)
-         if functions.isalivecheck() then
+         if funcs.isalivecheck() then
              local speed = s or 0
              local count = div or 10
-             local amt = functions.generateNumbers(count)
+             local amt = funcs.generateNumbers(count)
              local start = ply.Character:WaitForChild('HumanoidRootPart').Position
              local endPos = place.Position
              local totalDistance = (endPos - start).Magnitude
@@ -74,7 +74,7 @@ local functions = {
                  else
                      spot = start:Lerp(endPos, v)
                  end
-                 functions.nc(true)
+                 funcs.nc(true)
                  ply.Character:WaitForChild('HumanoidRootPart').CFrame = CFrame.new(spot)
                  wait(speed)
                  local currentDistance = (spot - start).Magnitude
@@ -207,10 +207,10 @@ local functions = {
                   game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servs[math.random(1, #servs)], game.Players.LocalPlayer)
               end)
               if not worked then
-                  functions.servhop()
+                  funcs.servhop()
               end
           else
-              functions.servhop()
+              funcs.servhop()
           end
      end,
      rj = function()
@@ -218,7 +218,7 @@ local functions = {
               game:GetService('TeleportService'):Teleport(game.PlaceId, ply)
           end)
           if not worked then
-              functions.rj()
+              funcs.rj()
           end
      end,
   
@@ -235,4 +235,4 @@ local functions = {
           })
      end
 }
-return functions
+return funcs
