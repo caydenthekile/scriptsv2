@@ -1,30 +1,30 @@
 getgenv().funcs = {
      isalivecheck = function()
-         local exists, part = pcall(function()
-             return ply.Character.Humanoid
-         end)
-         if exists then
-             if part.Health > 0 then
-                 return true
-             else
-                 return false
-             end
-         else
-             return false
-         end
+          local exists, part = pcall(function()
+               return ply.Character.Humanoid
+          end)
+          if exists then
+               if part.Health > 0 then
+                    return true
+               else
+                    return false
+               end
+          else
+               return false
+          end
      end,
- 
+
      nc = function(val)
          local newvel = Instance.new('BodyVelocity')
          newvel.Name = 'idkkkk'
          newvel.Velocity = Vector3.new(0, 0, 0)
          if funcs.isalivecheck() then
              if val then
-                 if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
-                     newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
+                 if not funcs.getroot():FindFirstChild(newvel.Name) then
+                     newvel.Parent = funcs.getroot()
                  end
              elseif not val or val == nil then
-                 for i, v in next, ply.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
+                 for i, v in next, getroot():GetChildren() do
                      if v.Name == newvel.Name then
                          v:Destroy()
                      end
@@ -35,15 +35,15 @@ getgenv().funcs = {
  
      returndist = function(part)
          local dist
-         if ply.Character ~= nil then
-             dist = (ply.Character:WaitForChild('HumanoidRootPart').Position - part.Position).Magnitude
+         if funcs.isalivecheck() then
+             dist = (funcs.getroot().Position - part.Position).Magnitude
          end
          return dist
      end,
  
      tp = function(place)
          if ply.Character then
-             ply.Character:WaitForChild('HumanoidRootPart').Position = place.Position
+               funcs.getroot().Position = place.Position
          end
      end,
  
@@ -64,7 +64,7 @@ getgenv().funcs = {
              local speed = s or 0
              local count = div or 10
              local amt = funcs.generateNumbers(count)
-             local start = ply.Character:WaitForChild('HumanoidRootPart').Position
+             local start = funcs.getroot().Position
              local endPos = place.Position
              local totalDistance = (endPos - start).Magnitude
              for i, v in ipairs(amt) do
@@ -75,7 +75,7 @@ getgenv().funcs = {
                      spot = start:Lerp(endPos, v)
                  end
                  funcs.nc(true)
-                 ply.Character:WaitForChild('HumanoidRootPart').CFrame = CFrame.new(spot)
+                 funcs.getroot().CFrame = CFrame.new(spot)
                  wait(speed)
                  local currentDistance = (spot - start).Magnitude
                  if currentDistance >= totalDistance then
@@ -86,7 +86,7 @@ getgenv().funcs = {
      end,
      espadd = function(item, name, toggle, color)
           if item.ClassName == 'Model' then
-              local dist = (game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position - item:GetModelCFrame().Position).Magnitude
+              local dist = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
               local spot, vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
               local esp = {}
               esp.name = Drawing.new('Text')
@@ -123,7 +123,7 @@ getgenv().funcs = {
                           esp.distance:Remove()
                           task.cancel(threads.espthread2)
                       end
-                      local distt = (game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position - item:GetModelCFrame().Position).Magnitude
+                      local distt = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
                       local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
                       if viss then
                           setrenderproperty(esp.distance, "Visible", WoUStuff[toggle])
@@ -138,7 +138,7 @@ getgenv().funcs = {
               table.insert(threads, espthread1)
               table.insert(threads, espthread2)
           elseif item.ClassName == 'Part' then
-              local dist = (game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position - item.Position).Magnitude
+              local dist = (funcs.getroot().Position - item.Position).Magnitude
               local spot = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
               local esp = {}
               esp.name = Drawing.new('Text')
@@ -175,7 +175,7 @@ getgenv().funcs = {
                               esp.distance:Remove()
                               task.cancel(threads.espthread4)
                          end
-                         local distt = (game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").Position - item.Position).Magnitude
+                         local distt = (funcs.getroot().Position - item.Position).Magnitude
                          local spott,viss = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
                          if viss then
                               setrenderproperty(esp.distance,"Visible",toggle)
@@ -211,6 +211,16 @@ getgenv().funcs = {
               end
           else
               funcs.servhop()
+          end
+     end,
+     getroot = function()
+          local worked,stuff = pcall(function()
+               return ply.Character.HumanoidRootPart
+          end)
+          if not worked then
+               return task.wait()
+          elseif worked then 
+               return stuff
           end
      end,
      rj = function()
