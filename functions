@@ -24,7 +24,7 @@ getgenv().funcs = {
                      newvel.Parent = funcs.getroot()
                  end
              elseif not val or val == nil then
-                 for i, v in next, getroot():GetChildren() do
+                 for i, v in next, funcs.getroot():GetChildren() do
                      if v.Name == newvel.Name then
                          v:Destroy()
                      end
