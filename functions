@@ -35,9 +35,11 @@ getgenv().funcs = {
  
      returndist = function(part)
          local dist
-         if funcs.isalivecheck() then
-             dist = (funcs.getroot().Position - part.Position).Magnitude
-         end
+          if funcs.isalivecheck() then
+               if funcs.getroot() then
+                    dist = (funcs.getroot().Position - part.Position).Magnitude
+               end
+          end
          return dist
      end,
  
