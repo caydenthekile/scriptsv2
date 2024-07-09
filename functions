@@ -60,7 +60,7 @@ getgenv().funcs = {
          end
          return numbers
      end,
- tpsafe = function(place, s, div,facing)
+ tpsafe = function(place, s, div)
      if funcs.isalivecheck() then
          local speed = s or 0
          local count = div or 10
@@ -76,7 +76,7 @@ getgenv().funcs = {
                  spot = start:Lerp(endPos, v)
              end
              funcs.nc(true)
-             funcs.getroot().CFrame = CFrame.new(spot) * facing
+             funcs.getroot().CFrame = CFrame.new(spot)
              wait(speed)
              local currentDistance = (spot - start).Magnitude
              if currentDistance >= totalDistance then
