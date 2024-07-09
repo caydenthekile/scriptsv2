@@ -60,32 +60,31 @@ getgenv().funcs = {
          end
          return numbers
      end,
- 
-     tpsafe = function(place, s, div)
-         if funcs.isalivecheck() then
-             local speed = s or 0
-             local count = div or 10
-             local amt = funcs.generateNumbers(count)
-             local start = funcs.getroot().Position
-             local endPos = place.Position
-             local totalDistance = (endPos - start).Magnitude
-             for i, v in ipairs(amt) do
-                 local spot
-                 if i == 1 then
-                     spot = start
-                 else
-                     spot = start:Lerp(endPos, v)
-                 end
-                 funcs.nc(true)
-                 funcs.getroot().CFrame = CFrame.new(spot)
-                 wait(speed)
-                 local currentDistance = (spot - start).Magnitude
-                 if currentDistance >= totalDistance then
-                     break
-                 end
+ tpsafe = function(place, s, div,facing)
+     if funcs.isalivecheck() then
+         local speed = s or 0
+         local count = div or 10
+         local amt = funcs.generateNumbers(count)
+         local start = funcs.getroot().Position
+         local endPos = place.Position
+         local totalDistance = (endPos - start).Magnitude
+         for i, v in ipairs(amt) do
+             local spot
+             if i == 1 then
+                 spot = start
+             else
+                 spot = start:Lerp(endPos, v)
+             end
+             funcs.nc(true)
+             funcs.getroot().CFrame = CFrame.new(spot) * facing
+             wait(speed)
+             local currentDistance = (spot - start).Magnitude
+             if currentDistance >= totalDistance then
+                 break
              end
          end
-     end,
+     end
+ end,
      espadd = function(item, name, toggle, color)
           if item.ClassName == 'Model' then
               local dist = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
