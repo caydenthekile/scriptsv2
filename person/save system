@@ -1,4 +1,6 @@
-function savemanager(mainfolder,uiconfigs,gamespecific)
+function savemanager(gamespecific)
+     local mainfolder = "W.o.U's Custom Folder"
+     local uiconfigs = "W.o.U's Custom Folder//"..'UI Configs'
      function decode(stuff)
           return game:GetService('HttpService'):JSONDecode(stuff)
      end
