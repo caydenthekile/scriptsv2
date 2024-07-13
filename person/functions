@@ -1,13 +1,17 @@
-
+local gamenamee = 'Preset'
+local plyfake = game.Players.LocalPlayer
+local charfake = plyfake.Character or plyfake.CharacterAdded:Wait()
 getgenv().funcs = {
      threads = {},
      connections = {},
+     gamename = gamenamee,
      queue_on_teleport = queue_on_teleport or syn and syn.queue_on_teleport or fluxus and fluxus.queue_on_teleport,
      httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request,
-     gamename = 'Preset',
-     gamespecific = "W.o.U's Custom Folder//"..'UI Configs//'..game.Players.LocalPlayer.Name.."_"..gamename.."_".."autosave.json",
-     ply = game.Players.LocalPlayer,
-     char = funcs.ply.Character or funcs.ply.CharacrerAdded:Wait(),
+     gamespecific = function()
+          return "W.o.U's Custom Folder//"..'UI Configs//'..game.Players.LocalPlayer.Name.."_"..funcs.gamename.."_".."autosave.json"
+     end,
+     ply = plyfake,
+     char = charfake,
      getroot = function()
           local worked,part = pcall(function()
                return funcs.char.HumanoidRootPart
