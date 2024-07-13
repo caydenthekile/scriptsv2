@@ -2,6 +2,10 @@
 getgenv().funcs = {
      threads = {},
      connections = {},
+     queue_on_teleport = queue_on_teleport or syn and syn.queue_on_teleport or fluxus and fluxus.queue_on_teleport,
+     httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request,
+     gamename = 'Preset',
+     gamespecific = "W.o.U's Custom Folder//"..'UI Configs//'..game.Players.LocalPlayer.Name.."_"..gamename.."_".."autosave.json",
      ply = game.Players.LocalPlayer,
      char = funcs.ply.Character or funcs.ply.CharacrerAdded:Wait(),
      getroot = function()
@@ -12,7 +16,7 @@ getgenv().funcs = {
      end,
      isalivecheck = function()
           local exists, part = pcall(function()
-               return ply.Character.Humanoid
+               return funcs.ply.Character.Humanoid
           end)
           if exists then
                if part.Health > 0 then
@@ -25,22 +29,22 @@ getgenv().funcs = {
           end
      end,
      nc = function(val)
-         local newvel = Instance.new('BodyVelocity')
-         newvel.Name = 'idkkkk'
-         newvel.Velocity = Vector3.new(0, 0, 0)
-         if funcs.isalivecheck() then
-             if val then
-                 if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
-                     newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
-                 end
-             elseif not val or val == nil then
-                 for i, v in next,ply.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
-                     if v.Name == newvel.Name then
-                         v:Destroy()
-                     end
-                 end
-             end
-         end
+          local newvel = Instance.new('BodyVelocity')
+          newvel.Name = 'idkkkk'
+          newvel.Velocity = Vector3.new(0, 0, 0)
+          if funcs.isalivecheck() then
+               if val then
+                    if not funcs.getroot():FindFirstChild(newvel.Name) then
+                         newvel.Parent = funcs.getroot()
+                    end
+               elseif not val or val == nil then
+                    for i, v in next,funcs.getroot():GetChildren() do
+                         if v.Name == newvel.Name then
+                              v:Destroy()
+                         end
+                    end
+               end
+          end
      end,
      returndist = function(part)
          local dist
@@ -52,9 +56,9 @@ getgenv().funcs = {
          return dist
      end,
      tp = function(place)
-         if ply.Character then
+          if funcs.isalivecheck() then
                funcs.getroot().Position = place.Position
-         end
+          end
      end,
      generateNumbers = function(count)
          local numbers = {}
@@ -67,7 +71,7 @@ getgenv().funcs = {
          end
          return numbers
      end,
-     tpsafe = function(place, s, div)
+     tpsafe = function(place,s,div)
           if funcs.isalivecheck() then
           local speed = s or 0
           local count = div or 10
@@ -94,72 +98,72 @@ getgenv().funcs = {
      end,
      espadd = function(item, name, toggle, color)
           if item.ClassName == 'Model' then
-              local dist = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
-              local spot, vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
-              local esp = {}
-              esp.name = Drawing.new('Text')
-              esp.name.Text = name
-              esp.name.Size = 10
-              esp.name.Position = Vector2.new(spot.X - 35, spot.Y)
-              esp.name.Visible = false
-              esp.name.Color = WoUStuff[color]
-              local espthread1 = task.spawn(function()
-                  while true and task.wait() do
-                      if not item then
-                          esp.name:Remove()
-                          task.cancel(threads.espthread1)
-                      end
-                      local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
-                      if viss then
-                          setrenderproperty(esp.name, "Visible", WoUStuff[toggle])
-                          setrenderproperty(esp.name, 'Color', WoUStuff[color])
-                          setrenderproperty(esp.name, 'Position', Vector2.new(spott.X - 35, spott.Y))
-                      elseif not viss then
-                          setrenderproperty(esp.name, "Visible", false)
-                      end
-                  end
-              end)
-              esp.distance = Drawing.new('Text')
-              esp.distance.Text = math.round(dist)
-              esp.distance.Position = Vector2.new(spot.X - 5, spot.Y + 10)
-              esp.distance.Visible = false
-              esp.distance.Size = 10
-              esp.distance.Color = WoUStuff[color]
-              local espthread2 = task.spawn(function()
-                  while true and task.wait() do
-                      if not item then
-                          esp.distance:Remove()
-                          task.cancel(threads.espthread2)
-                      end
-                      local distt = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
-                      local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
-                      if viss then
-                          setrenderproperty(esp.distance, "Visible", WoUStuff[toggle])
-                          setrenderproperty(esp.distance, 'Color', WoUStuff[color])
-                          setrenderproperty(esp.distance, "Text", math.round(distt))
-                          setrenderproperty(esp.distance, 'Position', Vector2.new(spott.X - 5, spott.Y + 10))
-                      elseif not viss then
-                          setrenderproperty(esp.distance, "Visible", false)
-                      end
-                  end
-              end)
-              table.insert(threads, espthread1)
-              table.insert(threads, espthread2)
+               local dist = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
+               local spot, vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
+               local esp = {}
+               esp.name = Drawing.new('Text')
+               esp.name.Text = name
+               esp.name.Size = 10
+               esp.name.Position = Vector2.new(spot.X - 35, spot.Y)
+               esp.name.Visible = false
+               esp.name.Color = WoUStuff[color]
+               local espthread1 = task.spawn(function()
+                    while true and task.wait() do
+                         if not item then
+                              esp.name:Remove()
+                              task.cancel(threads.espthread1)
+                         end
+                         local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
+                         if viss then
+                              setrenderproperty(esp.name, "Visible", WoUStuff[toggle])
+                              setrenderproperty(esp.name, 'Color', WoUStuff[color])
+                              setrenderproperty(esp.name, 'Position', Vector2.new(spott.X - 35, spott.Y))
+                         elseif not viss then
+                              setrenderproperty(esp.name, "Visible", false)
+                         end
+                    end
+               end)
+               esp.distance = Drawing.new('Text')
+               esp.distance.Text = math.round(dist)
+               esp.distance.Position = Vector2.new(spot.X - 5, spot.Y + 10)
+               esp.distance.Visible = false
+               esp.distance.Size = 10
+               esp.distance.Color = WoUStuff[color]
+               local espthread2 = task.spawn(function()
+                    while true and task.wait() do
+                         if not item then
+                              esp.distance:Remove()
+                              task.cancel(threads.espthread2)
+                         end
+                         local distt = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
+                         local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
+                         if viss then
+                              setrenderproperty(esp.distance, "Visible", WoUStuff[toggle])
+                              setrenderproperty(esp.distance, 'Color', WoUStuff[color])
+                              setrenderproperty(esp.distance, "Text", math.round(distt))
+                              setrenderproperty(esp.distance, 'Position', Vector2.new(spott.X - 5, spott.Y + 10))
+                         elseif not viss then
+                              setrenderproperty(esp.distance, "Visible", false)
+                         end
+                    end
+               end)
+               table.insert(funcs.threads, espthread1)
+               table.insert(funcs.threads, espthread2)
           elseif item.ClassName == 'Part' then
-              local dist = (funcs.getroot().Position - item.Position).Magnitude
-              local spot = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
-              local esp = {}
-              esp.name = Drawing.new('Text')
-              esp.name.Text = name
-              esp.name.Size = 10
-              esp.name.Position = Vector2.new(spot.X - 35, spot.Y)
-              esp.name.Visible = false
-              esp.name.Color = WoUStuff[color]
+               local dist = (funcs.getroot().Position - item.Position).Magnitude
+               local spot = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
+               local esp = {}
+               esp.name = Drawing.new('Text')
+               esp.name.Text = name
+               esp.name.Size = 10
+               esp.name.Position = Vector2.new(spot.X - 35, spot.Y)
+               esp.name.Visible = false
+               esp.name.Color = WoUStuff[color]
                local espthread3 = task.spawn(function()
                     while true and task.wait() do
                          if not item then
                               esp.name:Remove()
-                              task.cancel(threads.espthread3)
+                              task.cancel(funcs.threads.espthread3)
                          end
                          local spott,viss = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
                          if viss then
@@ -181,7 +185,7 @@ getgenv().funcs = {
                     while true and task.wait() do
                          if not item then
                               esp.distance:Remove()
-                              task.cancel(threads.espthread4)
+                              task.cancel(funcs.threads.espthread4)
                          end
                          local distt = (funcs.getroot().Position - item.Position).Magnitude
                          local spott,viss = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
@@ -195,13 +199,13 @@ getgenv().funcs = {
                          end
                     end
                end)
-               table.insert(threads,espthread3)
-               table.insert(threads,espthread4)
+               table.insert(funcs.threads,espthread3)
+               table.insert(funcs.threads,espthread4)
           end
      end,
      servhop = function()
           local servs = {}
-          local req = httprequest({
+          local req = funcs.httprequest({
               Url = string.format("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100", game.placeId)
           })
           local body = game:GetService('HttpService'):JSONDecode(req.Body)
@@ -211,26 +215,26 @@ getgenv().funcs = {
               end
           end
           if #servs > 0 then
-              local worked, code = pcall(function()
-                  game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servs[math.random(1, #servs)], game.Players.LocalPlayer)
-              end)
-              if not worked then
-                  funcs.servhop()
-              end
+               local worked, code = pcall(function()
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servs[math.random(1, #servs)],funcs.ply)
+               end)
+               if not worked then
+                    funcs.servhop()
+               end
           else
               funcs.servhop()
           end
      end,
      rj = function()
           local worked, err = pcall(function()
-              game:GetService('TeleportService'):Teleport(game.PlaceId, ply)
+              game:GetService('TeleportService'):Teleport(game.PlaceId, funcs.ply)
           end)
           if not worked then
               funcs.rj()
           end
      end,
      send = function(what, where)
-          httprequest({
+          funcs.httprequest({
               Url = where,
               Method = "POST",
               Headers = {
