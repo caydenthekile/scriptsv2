@@ -1,0 +1,42 @@
+function savemanager(mainfolder,uiconfigs,gamespecific)
+     function decode(stuff)
+          return game:GetService('HttpService'):JSONDecode(stuff)
+     end
+     function encode(stuff)
+          return game:GetService('HttpService'):JSONEncode(stuff)
+     end
+     function g(folder)
+          local amt = {}
+          for i,v in next,folder do
+               table.insert(amt,v)
+          end
+          return #amt
+     end
+     if not isfolder(mainfolder) then
+          makefolder(mainfolder)
+     end
+     if not isfolder(uiconfigs) then
+          makefolder(uiconfigs)
+     end
+     if not isfile(gamespecific) then
+          writefile(gamespecific,encode(WoUStuff))
+     end
+     local decoded = decode(readfile(gamespecific))
+     if g(WoUStuff) > g(decoded) then
+          local newsave = decoded
+          for i,v in next,WoUStuff do
+               if not newsave[i] then
+                    newsave[i] = v
+               end
+          end
+          writefile(gamespecific,encode(newsave))
+     end
+     for i,v in next,decoded do
+          if i == 'autosave' then
+               WoUStuff[i] = v
+          else
+               WoUStuff[i] = v
+          end
+     end
+end
+return savemanager
