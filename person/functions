@@ -1,9 +1,11 @@
 local gamenamee = 'Preset'
 local plyfake = game.Players.LocalPlayer
 local charfake = plyfake.Character or plyfake.CharacterAdded:Wait()
+local threadsfake = {}
+local connectionsfake = {}
 getgenv().funcs = {
-     threads = {},
-     connections = {},
+     threads = threadsfake,
+     connections = connectionsfake,
      gamename = gamenamee,
      queue_on_teleport = queue_on_teleport or syn and syn.queue_on_teleport or fluxus and fluxus.queue_on_teleport,
      httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request,
@@ -20,7 +22,7 @@ getgenv().funcs = {
      end,
      isalivecheck = function()
           local exists, part = pcall(function()
-               return funcs.ply.Character.Humanoid
+               return funcs.char.Humanoid
           end)
           if exists then
                if part.Health > 0 then
@@ -115,7 +117,7 @@ getgenv().funcs = {
                     while true and task.wait() do
                          if not item then
                               esp.name:Remove()
-                              task.cancel(threads.espthread1)
+                              task.cancel(funcs.threads.espthread1)
                          end
                          local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
                          if viss then
@@ -137,7 +139,7 @@ getgenv().funcs = {
                     while true and task.wait() do
                          if not item then
                               esp.distance:Remove()
-                              task.cancel(threads.espthread2)
+                              task.cancel(funcs.threads.espthread2)
                          end
                          local distt = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
                          local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
