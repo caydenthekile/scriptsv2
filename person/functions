@@ -1,6 +1,7 @@
 local gamenamee = 'Preset'
 local plyfake = game.Players.LocalPlayer
 local charfake = plyfake.Character or plyfake.CharacterAdded:Wait()
+local rootfake = charfake:WaitForChild('HumanoidRootPart')
 local threadsfake = {}
 local connectionsfake = {}
 getgenv().funcs = {
@@ -14,14 +15,7 @@ getgenv().funcs = {
      end,
      ply = plyfake,
      char = charfake,
-     getroot = function()
-          local worked,part = pcall(function()
-               task.spawn(function()
-                    return funcs.char:WaitForChild('HumanoidRootPart')
-               end)
-          end)
-          return part
-     end,
+     root = rootfake,
      isalivecheck = function()
           local exists, part = pcall(function()
                return funcs.char.Humanoid
@@ -42,11 +36,11 @@ getgenv().funcs = {
           newvel.Velocity = Vector3.new(0, 0, 0)
           if funcs.isalivecheck() then
                if val then
-                    if not funcs.getroot():FindFirstChild(newvel.Name) then
-                         newvel.Parent = funcs.getroot()
+                    if not funcs.root:FindFirstChild(newvel.Name) then
+                         newvel.Parent = funcs.root
                     end
                elseif not val or val == nil then
-                    for i, v in next,funcs.getroot():GetChildren() do
+                    for i, v in next,funcs.root:GetChildren() do
                          if v.Name == newvel.Name then
                               v:Destroy()
                          end
@@ -57,15 +51,15 @@ getgenv().funcs = {
      returndist = function(part)
          local dist
           if funcs.isalivecheck() then
-               if funcs.getroot() then
-                    dist = (funcs.getroot().Position - part.Position).Magnitude
+               if funcs.root then
+                    dist = (funcs.root.Position - part.Position).Magnitude
                end
           end
          return dist
      end,
      tp = function(place)
           if funcs.isalivecheck() then
-               funcs.getroot().Position = place.Position
+               funcs.root.Position = place.Position
           end
      end,
      generateNumbers = function(count)
@@ -84,7 +78,7 @@ getgenv().funcs = {
                local speed = s or 0
                local count = div or 10
                local amt = funcs.generateNumbers(count)
-               local start = funcs.getroot().Position
+               local start = funcs.root.Position
                local endPos = place.Position
                local totalDistance = (endPos - start).Magnitude
                for i, v in ipairs(amt) do
@@ -95,7 +89,7 @@ getgenv().funcs = {
                          spot = start:Lerp(endPos, v)
                     end
                     funcs.nc(true)
-                    funcs.getroot().CFrame = CFrame.new(spot)
+                    funcs.root.CFrame = CFrame.new(spot)
                     wait(speed)
                     local currentDistance = (spot - start).Magnitude
                     if currentDistance >= totalDistance then
@@ -106,7 +100,7 @@ getgenv().funcs = {
      end,
      espadd = function(item, name, toggle, color)
           if item.ClassName == 'Model' then
-               local dist = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
+               local dist = (funcs.root.Position - item:GetModelCFrame().Position).Magnitude
                local spot, vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
                local esp = {}
                esp.name = Drawing.new('Text')
@@ -143,7 +137,7 @@ getgenv().funcs = {
                               esp.distance:Remove()
                               task.cancel(funcs.threads.espthread2)
                          end
-                         local distt = (funcs.getroot().Position - item:GetModelCFrame().Position).Magnitude
+                         local distt = (funcs.root.Position - item:GetModelCFrame().Position).Magnitude
                          local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
                          if viss then
                               setrenderproperty(esp.distance, "Visible", WoUStuff[toggle])
@@ -158,7 +152,7 @@ getgenv().funcs = {
                table.insert(funcs.threads, espthread1)
                table.insert(funcs.threads, espthread2)
           elseif item.ClassName == 'Part' then
-               local dist = (funcs.getroot().Position - item.Position).Magnitude
+               local dist = (funcs.root.Position - item.Position).Magnitude
                local spot = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
                local esp = {}
                esp.name = Drawing.new('Text')
@@ -195,7 +189,7 @@ getgenv().funcs = {
                               esp.distance:Remove()
                               task.cancel(funcs.threads.espthread4)
                          end
-                         local distt = (funcs.getroot().Position - item.Position).Magnitude
+                         local distt = (funcs.root.Position - item.Position).Magnitude
                          local spott,viss = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
                          if viss then
                               setrenderproperty(esp.distance,"Visible",toggle)
