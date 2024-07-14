@@ -78,10 +78,10 @@ getgenv().funcs = {
                local speed = s or 0
                local count = div or 10
                local amt = funcs.generateNumbers(count)
-               local start = funcs.root.Position
+               local start = game.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').Position
                local endPos = place.Position
                local totalDistance = (endPos - start).Magnitude
-               local alteration = angleCFrame or CFrame.new()
+               local alteration = angleCFrame or CFrame.Angles()
                for i, v in ipairs(amt) do
                     local spot
                     if i == 1 then
@@ -90,7 +90,7 @@ getgenv().funcs = {
                          spot = start:Lerp(endPos, v)
                     end
                     funcs.nc(true)
-                    funcs.root.CFrame = CFrame.new(spot) * alteration
+                    game.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').CFrame = CFrame.new(spot) * alteration
                     wait(speed)
                     local currentDistance = (spot - start).Magnitude
                     if currentDistance >= totalDistance then
