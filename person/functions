@@ -16,7 +16,9 @@ getgenv().funcs = {
      char = charfake,
      getroot = function()
           local worked,part = pcall(function()
-               return funcs.char.HumanoidRootPart
+               task.spawn(function()
+                    return funcs.char:WaitForChild('HumanoidRootPart')
+               end)
           end)
           return part
      end,
@@ -79,27 +81,27 @@ getgenv().funcs = {
      end,
      tpsafe = function(place,s,div)
           if funcs.isalivecheck() then
-          local speed = s or 0
-          local count = div or 10
-          local amt = funcs.generateNumbers(count)
-          local start = funcs.getroot().Position
-          local endPos = place.Position
-          local totalDistance = (endPos - start).Magnitude
-          for i, v in ipairs(amt) do
-               local spot
-               if i == 1 then
-                    spot = start
-               else
-                    spot = start:Lerp(endPos, v)
+               local speed = s or 0
+               local count = div or 10
+               local amt = funcs.generateNumbers(count)
+               local start = funcs.getroot().Position
+               local endPos = place.Position
+               local totalDistance = (endPos - start).Magnitude
+               for i, v in ipairs(amt) do
+                    local spot
+                    if i == 1 then
+                         spot = start
+                    else
+                         spot = start:Lerp(endPos, v)
+                    end
+                    funcs.nc(true)
+                    funcs.getroot().CFrame = CFrame.new(spot)
+                    wait(speed)
+                    local currentDistance = (spot - start).Magnitude
+                    if currentDistance >= totalDistance then
+                         break
+                    end
                end
-               funcs.nc(true)
-               funcs.getroot().CFrame = CFrame.new(spot)
-               wait(speed)
-               local currentDistance = (spot - start).Magnitude
-               if currentDistance >= totalDistance then
-                    break
-               end
-          end
           end
      end,
      espadd = function(item, name, toggle, color)
