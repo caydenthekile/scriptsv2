@@ -47,7 +47,7 @@ getgenv().funcs = {
           end
      end,
      noclip = function(val)
-          for _,part in ipairs(character:GetDescendants()) do
+          for _,part in ipairs(funcs.char:GetDescendants()) do
                if part:IsA("BasePart") then
                     part.CanCollide = not val
                end
