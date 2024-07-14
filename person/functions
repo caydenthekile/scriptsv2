@@ -248,4 +248,12 @@ getgenv().funcs = {
           })
      end
 }
+local new = {
+     __index = function(table,index)
+          if index == 'root' then
+               table['root'] = funcs.char:WaitForChild('HumanoidRootPart')
+          end
+     end
+}
+setmetatable(funcs,new)
 return funcs
