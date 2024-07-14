@@ -30,7 +30,7 @@ getgenv().funcs = {
                return false
           end
      end,
-     nc = function(val)
+     float = function(val)
           local newvel = Instance.new('BodyVelocity')
           newvel.Name = 'idkkkk'
           newvel.Velocity = Vector3.new(0, 0, 0)
@@ -40,11 +40,16 @@ getgenv().funcs = {
                          newvel.Parent = funcs.root
                     end
                elseif not val or val == nil then
-                    for i, v in next,funcs.root:GetChildren() do
-                         if v.Name == newvel.Name then
-                              v:Destroy()
-                         end
+                    if funcs.root:FindFirstChild(newvel.Name) then
+                         funcs.root:FindFirstChild(newvel.Name):Destroy()
                     end
+               end
+          end
+     end,
+     noclip = function(val)
+          for _,part in ipairs(character:GetDescendants()) do
+               if part:IsA("BasePart") then
+                    part.CanCollide = not val
                end
           end
      end,
@@ -59,7 +64,7 @@ getgenv().funcs = {
      end,
      tp = function(place)
           if funcs.isalivecheck() then
-               funcs.root.Position = place.Position
+               funcs.root.CFrame = place.CFrame
           end
      end,
      generateNumbers = function(count)
@@ -73,31 +78,13 @@ getgenv().funcs = {
          end
          return numbers
      end,
-     tpsafe = function(place, s, div, angleCFrame)
-          if funcs.isalivecheck() then
-               local speed = s or 0
-               local count = div or 10
-               local amt = funcs.generateNumbers(count)
-               local start = game.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').Position
-               local endPos = place.Position
-               local totalDistance = (endPos - start).Magnitude
-               local alteration = angleCFrame or CFrame.Angles()
-               for i, v in ipairs(amt) do
-                    local spot
-                    if i == 1 then
-                         spot = start
-                    else
-                         spot = start:Lerp(endPos, v)
-                    end
-                    funcs.nc(true)
-                    game.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').CFrame = CFrame.new(spot) * alteration
-                    wait(speed)
-                    local currentDistance = (spot - start).Magnitude
-                    if currentDistance >= totalDistance then
-                         break
-                    end
-               end
-          end
+     tpsafe = function(place,speed)
+          local duration = (game.Players.LocalPlayer.Character:WaitForChild('HumanoidRootPart').Position - place.Position).Magnitude/speed
+          local tweenInfo = TweenInfo.new(duration,Enum.EasingStyle.Linear)
+          local tween = game:GetService('TweenService'):Create(funcs.root,tweenInfo,{CFrame = place})
+          funcs.noclip(true)
+          funcs.float(true)
+          tween:Play()
      end,
      espadd = function(item, name, toggle, color)
           if item.ClassName == 'Model' then
