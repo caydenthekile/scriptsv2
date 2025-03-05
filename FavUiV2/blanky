@@ -1,7 +1,8 @@
 function give_keys(input)
     if input == 'k' then
         return {
-            first_key = {'caydenthekile',}
+            first_key = {'caydenthekile',},
+            ACEDEV = {'BONGCLEARER',}
         }
     end
 end
