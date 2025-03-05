@@ -1,0 +1,7 @@
+function give_keys(input)
+    if input == 'k' then
+        return {
+            first_key = {'caydenthekile',}
+        }
+    end
+end
