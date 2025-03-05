@@ -1,0 +1,13 @@
+--paid script loadstring
+local getgenv().User_Key = 'first_key'
+--all this below gets obfuscated
+local pulled = loadstring(game:HttpGet("https://raw.githubusercontent.com/rg32469/aedoiawdsa/refs/heads/main/obf%20key%20storage", true))()
+local key_data = pulled('k')
+if table.find(key_data,User_Key) then
+    if key[game.Players.LocalPlayer.Name] then
+        local stuff = loadstring(game:HttpGet('github'))
+        stuff(game.GameId,'k')
+    end
+else
+    game.Players.LocalPlayer:Kick('Invalid Key')
+end
