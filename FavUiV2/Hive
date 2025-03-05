@@ -1,0 +1,685 @@
+function Paidscriptt(input,pass)
+    if pass == 'k' then
+        if input == 7248373505 then
+            local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua'))()
+            local ThemeManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/addons/ThemeManager.lua'))()
+                                local SaveManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/addons/SaveManager.lua'))()
+                                local RunService = game:GetService("RunService")
+                                local TweenService = game:GetService("TweenService")
+                                local UserInputService = game:GetService("UserInputService")
+                                local Players = game:GetService("Players")
+                                local LocalPlayer = Players.LocalPlayer
+                                local Camera = workspace.CurrentCamera
+
+                                -- Variables for both features
+                                local player = game.Players.LocalPlayer
+                                local character = player.Character or player.CharacterAdded:Wait()
+                                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                                local UIS = game:GetService("UserInputService")
+                                local runService = game:GetService("RunService")
+
+
+                                local TPWalking = false
+                                local JumpEnabled = false
+                                local Flying = false
+                                local BodyVelocity
+                                local BodyGyro
+                                local Keybinds = {}
+
+                                local function ToggleFeature(name)
+                                    local toggle = Toggles[name]
+                                    if toggle then
+                                        toggle:SetValue(not toggle.Value)
+                                    end
+                                end
+
+
+                                -- Attack Assist Variables
+                                local attached = false
+                                local bodyPosition
+                                local speed = 0.5
+                                local currentTarget = nil
+                                local connection
+
+                                -- Void TP Variables
+                                local savedPosition = nil
+                                local teleportDistance = 50
+                                local isTeleportingDown = true
+                                local hovering = false
+                                local voidBodyPosition = nil
+
+                                -- Window Creation
+                                local Window = Library:CreateWindow({
+                                    Title = 'ACE',
+                                    Center = true,
+                                    AutoShow = true,
+                                })
+
+                                -- Tabs
+                                local Tabs = {
+                                    Main = Window:AddTab('Main'),
+                                    Settings = Window:AddTab('Settings'),
+                                }
+
+                                -- Movement Box
+                                local MovementBox = Tabs.Main:AddLeftGroupbox('Movement Controls')
+
+                                -- TPWalk Function
+                                local function TPWalk(speed)
+                                    if not TPWalking then return end
+                                    local chr = LocalPlayer.Character
+                                    local hum = chr and chr:FindFirstChild("Humanoid")
+
+                                    if hum and speed > 0 then
+                                        local vel = hum.MoveDirection * speed
+                                        if vel.Magnitude > 0 then
+                                            chr:TranslateBy(vel * RunService.Heartbeat:Wait())
+                                        end
+                                    end
+                                end
+
+                                -- Fly Setup
+                                local function SetupFly()
+                                    local Character = LocalPlayer.Character
+                                    local PrimaryPart = Character and Character:FindFirstChild("HumanoidRootPart")
+                                    if not PrimaryPart then return end
+
+                                    BodyVelocity = Instance.new("BodyVelocity")
+                                    BodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                    BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+
+                                    BodyGyro = Instance.new("BodyGyro")
+                                    BodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                                    BodyGyro.P = 9000
+                                    BodyGyro.D = 250
+                                end
+
+
+                                -- -- UI Controls
+                                Keybinds.TPWalk = MovementBox:AddToggle('TPWalkEnabled', {
+                                    Text = 'TP Walk',
+                                    Default = false,
+                                    Tooltip = 'Enable/Disable TP Walk',
+                                    Callback = function(Value)
+                                        TPWalking = Value
+                                    end
+                                }):AddKeyPicker('TPWalkKeybind', {
+                                    Default = 'T',
+                                    Mode = 'Toggle',
+                                    Text = 'TP Walk',
+                                    NoUI = false,
+                                    Callback = function(Value)
+                                        Toggles.TPWalkEnabled:SetValue(Value)
+                                        TPWalking = Value
+                                    end
+                                })
+
+                                MovementBox:AddSlider('WalkSpeed', {
+                                    Text = 'Walk Speed',
+                                    Default = 16,
+                                    Min = 1,
+                                    Max = 500,
+                                    Rounding = 1,
+                                    Compact = false,
+                                })
+
+                                Keybinds.Jump = MovementBox:AddToggle('JumpEnabled', {
+                                    Text = 'Custom Jump Power',
+                                    Default = false,
+                                    Tooltip = 'Enable/Disable Custom Jump Power',
+                                    Callback = function(Value)
+                                        JumpEnabled = Value
+                                        local chr = LocalPlayer.Character
+                                        local hum = chr and chr:FindFirstChild("Humanoid")
+                                        if hum then
+                                            hum.JumpPower = JumpEnabled and Options.JumpPower.Value or 50
+                                        end
+                                    end
+                                }):AddKeyPicker('JumpKeybind', {
+                                    Default = 'J',
+                                    Mode = 'Toggle',
+                                    Text = 'Jump Power',
+                                    NoUI = false,
+                                    Callback = function(Value)
+                                        Toggles.JumpEnabled:SetValue(Value)
+                                        JumpEnabled = Value
+                                        local chr = LocalPlayer.Character
+                                        local hum = chr and chr:FindFirstChild("Humanoid")
+                                        if hum then
+                                            hum.JumpPower = JumpEnabled and Options.JumpPower.Value or 50
+                                        end
+                                    end
+                                })
+
+                                MovementBox:AddSlider('JumpPower', {
+                                    Text = 'Jump Power',
+                                    Default = 50,
+                                    Min = 50,
+                                    Max = 500,
+                                    Rounding = 0,
+                                    Compact = false,
+                                })
+
+                                Keybinds.Fly = MovementBox:AddToggle('FlyEnabled', {
+                                    Text = 'Fly',
+                                    Default = false,
+                                    Tooltip = 'Enable/Disable Flying',
+                                    Callback = function(Value)
+                                        Flying = Value
+                                        if Value then
+                                            SetupFly()
+                                        else
+                                            if BodyVelocity then BodyVelocity.Parent = nil end
+                                            if BodyGyro then BodyGyro.Parent = nil end
+                                        end
+                                    end
+                                }):AddKeyPicker('FlyKeybind', {
+                                    Default = 'G',
+                                    Mode = 'Toggle',
+                                    Text = 'Fly',
+                                    NoUI = false,
+                                    Callback = function(Value)
+                                        Toggles.FlyEnabled:SetValue(Value)
+                                        Flying = Value
+                                        if Value then
+                                            SetupFly()
+                                        else
+                                            if BodyVelocity then BodyVelocity.Parent = nil end
+                                            if BodyGyro then BodyGyro.Parent = nil end
+                                        end
+                                    end
+                                })
+
+
+                                MovementBox:AddSlider('FlySpeed', {
+                                    Text = 'Fly Speed',
+                                    Default = 45,
+                                    Min = 1,
+                                    Max = 500,
+                                    Rounding = 0,
+                                    Compact = false,
+                                })
+
+                                -- Keybind Setup
+                                local KeybindsGroup = Tabs.Settings:AddLeftGroupbox('Keybinds')
+
+                                KeybindsGroup:AddLabel('Fly'):AddKeyPicker('FlyKeybind', {
+                                    Default = 'G',
+                                    Text = 'Fly',
+                                    NoUI = false,
+                                })
+
+                                KeybindsGroup:AddLabel('TP Walk'):AddKeyPicker('TPWalkKeybind', {
+                                    Default = 'T',
+                                    Text = 'TP Walk',
+                                    NoUI = false,
+                                })
+
+                                KeybindsGroup:AddLabel('Jump Power'):AddKeyPicker('JumpKeybind', {
+                                    Default = 'J',
+                                    Text = 'Jump Power',
+                                    NoUI = false,
+                                })
+
+                                -- Input Handler
+                                UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                                    if gameProcessed then return end
+
+                                    for feature, toggle in pairs(Keybinds) do
+                                        local keybind = Options[feature .. 'Keybind']
+                                        if keybind and input.KeyCode == keybind.Value then
+                                            toggle:SetValue(not toggle.Value)
+                                        end
+                                    end
+                                end)
+
+
+                                -- Main Loop (remains the same)
+                                RunService.Heartbeat:Connect(function()
+                                    if TPWalking then
+                                        TPWalk(Options.WalkSpeed.Value)
+                                    end
+
+                                    if Flying then
+                                        local Character = LocalPlayer.Character
+                                        local PrimaryPart = Character and Character:FindFirstChild("HumanoidRootPart")
+                                        if not PrimaryPart then return end
+
+                                        local CamCFrame = Camera.CFrame
+                                        local Velocity = Vector3.new(0, 0, 0)
+                                        local Rotation = CamCFrame.Rotation
+
+                                        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                                            Velocity += CamCFrame.LookVector
+                                            Rotation *= CFrame.Angles(math.rad(-40), 0, 0)
+                                        end
+                                        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                                            Velocity -= CamCFrame.LookVector
+                                            Rotation *= CFrame.Angles(math.rad(40), 0, 0)
+                                        end
+                                        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                                            Velocity += CamCFrame.RightVector
+                                            Rotation *= CFrame.Angles(0, 0, math.rad(-40))
+                                        end
+                                        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                                            Velocity -= CamCFrame.RightVector
+                                            Rotation *= CFrame.Angles(0, 0, math.rad(40))
+                                        end
+                                        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                                            Velocity += Vector3.new(0, 1, 0)
+                                        end
+                                        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                                            Velocity -= Vector3.new(0, 1, 0)
+                                        end
+
+                                        local TweenInfo = TweenInfo.new(0.5)
+                                        TweenService:Create(BodyVelocity, TweenInfo, {Velocity = Velocity * Options.FlySpeed.Value}):Play()
+                                        BodyVelocity.Parent = PrimaryPart
+
+                                        TweenService:Create(BodyGyro, TweenInfo, {CFrame = Rotation}):Play()
+                                        BodyGyro.Parent = PrimaryPart
+                                    end
+                                end)
+
+
+                                -- Main Tab Boxes
+                                local AttackBox = Tabs.Main:AddLeftGroupbox('Attack Assist (Hold Z)')
+                                local VoidBox = Tabs.Main:AddRightGroupbox('Void TP Controls')
+                                local CooldownBox = Tabs.Main:AddLeftGroupbox('No Cooldown (Shin only for now)')
+                                local TargetBox = Tabs.Main:AddLeftGroupbox('Auto Void Kill')
+
+                                -- Attack Assist Controls
+                                AttackBox:AddSlider('AssistSpeed', {
+                                    Text = 'Assist Speed',
+                                    Default = 0.5,
+                                    Min = 0.1,
+                                    Max = 2,
+                                    Rounding = 2,
+                                    Compact = false,
+                                })
+
+                                -- Void TP Controls
+                                VoidBox:AddSlider('TeleportDistance', {
+                                    Text = 'Teleport Distance',
+                                    Default = 50,
+                                    Min = 1,
+                                    Max = 30000,
+                                    Rounding = 0,
+                                    Compact = false,
+                                })
+
+                                VoidBox:AddToggle('TeleportDirection', {
+                                    Text = 'Teleport Direction',
+                                    Text = 'On = Down Off = Up',
+                                    Default = true,
+                                    Tooltip = 'Toggle between up and down teleportation'
+                                })
+
+                                VoidBox:AddLabel('Hold C to teleport')
+
+                                -- No Cooldown Button
+                                CooldownBox:AddButton('Enable No Cooldown', function()
+                                    local UserInputService = game:GetService("UserInputService")
+                                    local player = game:GetService("Players").LocalPlayer
+                                    local remote = player.Character:WaitForChild("RemoteEvent")
+
+                                    local function onInputBegan(input, gameProcessed)
+                                        if gameProcessed then return end
+                                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                                            local keyMap = {
+                                                [Enum.KeyCode.One] = 1,
+                                                [Enum.KeyCode.Two] = 2,
+                                                [Enum.KeyCode.Three] = 3,
+                                                [Enum.KeyCode.Four] = 4
+                                            }
+                                            local attackNumber = keyMap[input.KeyCode]
+                                            if attackNumber then
+                                                remote:FireServer(attackNumber)
+                                            end
+                                        end
+                                    end
+
+                                    UserInputService.InputBegan:Connect(onInputBegan)
+                                end)
+
+                                -- Target System
+                                local function GetPlayerList()
+                                    local PlayerList = {}
+                                    for _, player in ipairs(game.Players:GetPlayers()) do
+                                        if player ~= game.Players.LocalPlayer then
+                                            table.insert(PlayerList, player.Name)
+                                        end
+                                    end
+                                    return PlayerList
+                                end
+
+                                TargetBox:AddDropdown('PlayerSelect', {
+                                    Values = GetPlayerList(),
+                                    Default = 1,
+                                    Multi = false,
+                                    Text = 'Select Target',
+                                    Tooltip = 'Choose a player to target',
+                                })
+
+                                TargetBox:AddInput('GrabKey', {
+                                    Default = '2',
+                                    Numeric = false,
+                                    Finished = true,
+                                    Text = 'Grab Key',
+                                    Tooltip = 'Enter your grab keybind',
+                                    Placeholder = 'Enter key...',
+                                })
+
+                                TargetBox:AddButton({
+                                    Text = 'Teleport to Target',
+                                    Func = function()
+                                        local targetPlayer = game.Players:FindFirstChild(Options.PlayerSelect.Value)
+                                        if targetPlayer and targetPlayer.Character then
+                                            player.Character:SetPrimaryPartCFrame(targetPlayer.Character.PrimaryPart.CFrame)
+                                        end
+                                    end,
+                                    DoubleClick = false,
+                                })
+
+                                TargetBox:AddButton({
+                                    Text = 'Kill Target',
+                                    Func = function()
+                                        local targetPlayer = game.Players:FindFirstChild(Options.PlayerSelect.Value)
+                                        if targetPlayer and targetPlayer.Character then
+                                            local targetHRP = targetPlayer.Character.PrimaryPart
+                                            local localHRP = player.Character and player.Character.PrimaryPart
+
+                                            if localHRP then
+                                                local originalPosition = localHRP.CFrame
+                                                local behindTargetCFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                                                localHRP.CFrame = behindTargetCFrame
+                                                
+                                                task.wait(0.2)
+                                                
+                                                local inputKey = Options.GrabKey.Value
+                                                local keyMap = {
+                                                    ['1'] = Enum.KeyCode.One,
+                                                    ['2'] = Enum.KeyCode.Two,
+                                                    ['3'] = Enum.KeyCode.Three,
+                                                    ['4'] = Enum.KeyCode.Four,
+                                                    ['5'] = Enum.KeyCode.Five,
+                                                    ['6'] = Enum.KeyCode.Six,
+                                                    ['7'] = Enum.KeyCode.Seven,
+                                                    ['8'] = Enum.KeyCode.Eight,
+                                                    ['9'] = Enum.KeyCode.Nine,
+                                                    ['0'] = Enum.KeyCode.Zero
+                                                }
+                                                
+                                                local keyCode = keyMap[inputKey] or Enum.KeyCode[string.upper(inputKey)]
+                                                
+                                                game:GetService("VirtualInputManager"):SendKeyEvent(true, keyCode, false, game)
+                                                task.wait(0.1)
+                                                game:GetService("VirtualInputManager"):SendKeyEvent(false, keyCode, false, game)
+                                                
+                                                task.wait(1.5)
+                                                localHRP.CFrame = CFrame.new(999999, 100000000, 999999)
+                                                
+                                                task.wait(3)
+                                                localHRP.CFrame = originalPosition
+                                            end
+                                        end
+                                    end,
+                                    DoubleClick = false,
+                                })
+
+                                TargetBox:AddButton({
+                                    Text = 'Bring Target',
+                                    Func = function()
+                                        local targetPlayer = game.Players:FindFirstChild(Options.PlayerSelect.Value)
+                                        if targetPlayer and targetPlayer.Character then
+                                            local targetHRP = targetPlayer.Character.PrimaryPart
+                                            local localHRP = player.Character and player.Character.PrimaryPart
+                                            
+                                            if localHRP then
+                                                -- Save current position
+                                                local savedPos = localHRP.CFrame
+                                                
+                                                -- Teleport behind target and grab them
+                                                local behindTargetCFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                                                localHRP.CFrame = behindTargetCFrame
+                                                task.wait(0.2)
+                                                
+                                                -- Execute grab input
+                                                local inputKey = Options.GrabKey.Value
+                                                local keyMap = {
+                                                    ['1'] = Enum.KeyCode.One,
+                                                    ['2'] = Enum.KeyCode.Two,
+                                                    ['3'] = Enum.KeyCode.Three,
+                                                    ['4'] = Enum.KeyCode.Four,
+                                                    ['5'] = Enum.KeyCode.Five,
+                                                    ['6'] = Enum.KeyCode.Six,
+                                                    ['7'] = Enum.KeyCode.Seven,
+                                                    ['8'] = Enum.KeyCode.Eight,
+                                                    ['9'] = Enum.KeyCode.Nine,
+                                                    ['0'] = Enum.KeyCode.Zero
+                                                }
+                                                
+                                                local keyCode = keyMap[inputKey] or Enum.KeyCode[string.upper(inputKey)]
+                                                game:GetService("VirtualInputManager"):SendKeyEvent(true, keyCode, false, game)
+                                                task.wait(0.1)
+                                                game:GetService("VirtualInputManager"):SendKeyEvent(false, keyCode, false, game)
+                                                
+                                                -- Wait for grab, then return to saved position with target
+                                                task.wait(1.5)
+                                                localHRP.CFrame = savedPos
+                                            end
+                                        end
+                                    end,
+                                    DoubleClick = false,
+                                })
+
+
+                                -- Attack Assist Functions
+                                local function getNearestPlayer()
+                                    local closestPlayer = nil
+                                    local shortestDistance = math.huge
+                                    
+                                    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                                        if otherPlayer ~= player and otherPlayer.Character then
+                                            local otherRoot = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                            if otherRoot then
+                                                local distance = (humanoidRootPart.Position - otherRoot.Position).Magnitude
+                                                if distance < shortestDistance then
+                                                    shortestDistance = distance
+                                                    closestPlayer = otherRoot
+                                                end
+                                            end
+                                        end
+                                    end
+                                    return closestPlayer
+                                end
+
+                                local function toggleAttach()
+                                    attached = not attached
+                                    if attached then
+                                        if not currentTarget then
+                                            currentTarget = getNearestPlayer()
+                                        end
+                                        
+                                        if not bodyPosition then
+                                            bodyPosition = Instance.new("BodyPosition")
+                                            bodyPosition.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                                            bodyPosition.Parent = humanoidRootPart
+                                        end
+                                        
+                                        if connection then connection:Disconnect() end
+                                        connection = runService.RenderStepped:Connect(function()
+                                            if attached and currentTarget then
+                                                bodyPosition.Position = humanoidRootPart.Position:Lerp(currentTarget.Position, Options.AssistSpeed.Value)
+                                            end
+                                        end)
+                                    else
+                                        if connection then connection:Disconnect() end
+                                        currentTarget = nil
+                                        if bodyPosition then
+                                            bodyPosition:Destroy()
+                                            bodyPosition = nil
+                                        end
+                                    end
+                                end
+
+                                -- Void TP Functions
+                                local function teleport()
+                                    if savedPosition then
+                                        local offset = Toggles.TeleportDirection.Value and -Options.TeleportDistance.Value or Options.TeleportDistance.Value
+                                        local newPos = savedPosition + Vector3.new(0, offset, 0)
+                                        player.Character:SetPrimaryPartCFrame(CFrame.new(newPos))
+                                    end
+                                end
+
+                                local function savePosition()
+                                    savedPosition = player.Character.HumanoidRootPart.Position
+                                    teleport()
+                                end
+
+                                local function levitate()
+                                    if not voidBodyPosition then
+                                        voidBodyPosition = Instance.new("BodyPosition")
+                                        voidBodyPosition.MaxForce = Vector3.new(400000, 400000, 400000)
+                                        voidBodyPosition.D = 50
+                                        voidBodyPosition.P = 10000
+                                        voidBodyPosition.Parent = player.Character.HumanoidRootPart
+                                    end
+                                    voidBodyPosition.Position = player.Character.HumanoidRootPart.Position
+                                end
+
+                                local function stopLevitation()
+                                    if voidBodyPosition then
+                                        voidBodyPosition:Destroy()
+                                        voidBodyPosition = nil
+                                    end
+                                end
+
+                                local function returnToSavedPosition()
+                                    if savedPosition then
+                                        player.Character.HumanoidRootPart.CFrame = CFrame.new(savedPosition)
+                                    end
+                                end
+
+                                -- Input Handling
+                                UIS.InputBegan:Connect(function(input, gameProcessed)
+                                    if gameProcessed then return end
+                                    if input.KeyCode == Enum.KeyCode.Z then
+                                        toggleAttach()
+                                    elseif input.KeyCode == Enum.KeyCode.C then
+                                        savePosition()
+                                        levitate()
+                                    end
+                                end)
+
+                                UIS.InputEnded:Connect(function(input)
+                                    if input.KeyCode == Enum.KeyCode.Z then
+                                        attached = false
+                                        if connection then connection:Disconnect() end
+                                        currentTarget = nil
+                                        if bodyPosition then
+                                            bodyPosition:Destroy()
+                                            bodyPosition = nil
+                                        end
+                                    elseif input.KeyCode == Enum.KeyCode.C then
+                                        returnToSavedPosition()
+                                        stopLevitation()
+                                    end
+                                end)
+
+                                -- Player List Updates
+                                game.Players.PlayerAdded:Connect(function()
+                                    Options.PlayerSelect.Values = GetPlayerList()
+                                    Options.PlayerSelect:SetValues()
+                                end)
+
+                                game.Players.PlayerRemoving:Connect(function()
+                                    Options.PlayerSelect.Values = GetPlayerList()
+                                    Options.PlayerSelect:SetValues()
+                                end)
+
+                                -- Auto Farm Box
+                                local FarmBox = Tabs.Main:AddRightGroupbox('Auto Farm')
+
+                                -- Add dropdown for player selection
+                                FarmBox:AddDropdown('FarmTarget', {
+                                    Values = GetPlayerList(),
+                                    Default = 1,
+                                    Multi = false,
+                                    Text = 'USE SHIN NO COOLDOWN',
+                                    Tooltip = 'Player to auto-farm',
+                                })
+
+                                -- Add toggle for auto-farm
+                                local FarmConnection = nil
+                                FarmBox:AddToggle('AutoFarm', {
+                                    Text = 'Auto Farm Player',
+                                    Default = false,
+                                    Tooltip = 'Automatically farms selected player',
+                                    
+                                    Callback = function(Value)
+                                        if Value then
+                                            FarmConnection = RunService.Heartbeat:Connect(function()
+                                                local targetPlayer = Players:FindFirstChild(Options.FarmTarget.Value)
+                                                if targetPlayer and targetPlayer.Character and LocalPlayer.Character then
+                                                    local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                                    local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                                    
+                                                    if targetRoot and localRoot then
+                                                        localRoot.CFrame = targetRoot.CFrame
+                                                        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.One, false, game)
+                                                        task.wait()
+                                                        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.One, false, game)
+                                                    end
+                                                end
+                                            end)
+                                        else
+                                            if FarmConnection then
+                                                FarmConnection:Disconnect()
+                                                FarmConnection = nil
+                                            end
+                                        end
+                                    end
+                                })
+
+                                -- Add this after your other boxes in the Main tab
+                                local MoneyBox = Tabs.Main:AddRightGroupbox('Money Multiplier')
+
+                                MoneyBox:AddToggle('MoneyMultiplier', {
+                                    Text = 'Money Multiplier',
+                                    Default = false,
+                                    Tooltip = 'Automatically multiplies money',
+                                    
+                                    Callback = function(Value)
+                                        if Value then
+                                            MoneyConnection = RunService.Heartbeat:Connect(function()
+                                                local args = {2}
+                                                game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("IngameUi"):WaitForChild("TierChange"):FireServer(unpack(args))
+                                                task.wait(0.1)
+                                            end)
+                                        else
+                                            if MoneyConnection then
+                                                MoneyConnection:Disconnect()
+                                                MoneyConnection = nil
+                                            end
+                                        end
+                                    end
+                                })
+
+
+                                -- Settings Tab
+                                local MenuGroup = Tabs.Settings:AddLeftGroupbox('Menu')
+                                MenuGroup:AddButton('Unload', function() Library:Unload() end)
+                                MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true })
+
+
+                                ThemeManager:SetLibrary(Library)
+                                SaveManager:SetLibrary(Library)
+                                ThemeManager:SetFolder('AceScript')
+                                SaveManager:SetFolder('AceScript/specific-game')
+                                SaveManager:BuildConfigSection(Tabs.Settings)
+                                ThemeManager:ApplyToTab(Tabs.Settings)
+                                SaveManager:LoadAutoloadConfig()
+        end
+    end
+end
