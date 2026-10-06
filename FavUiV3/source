@@ -3187,7 +3187,7 @@ function Library:CreateWindow(...)
 
             local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.BackgroundColor;
-                BorderColor3 = Library.OutlineColor;
+                BorderColor3 = Color3.new(0.835294, 0.717647, 0.717647);
                 BorderMode = Enum.BorderMode.Inset;
                 Size = UDim2.new(100, 0, 0, 250 + 2);
                 ZIndex = 2;
