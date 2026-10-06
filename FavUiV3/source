@@ -1,21 +1,18 @@
-while true and task.wait() do 
-     if game:IsLoaded() then
-          break
-     end
-end
-local httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
-httprequest({
-  Url = 'https://discord.com/api/webhooks/1236036523506274434/5cwbqCHCXdtPNTOCI3KutlKo8dxMRBkQDfbXrst2uK5u_mBw8UrBLLNCk4sWH-tGsAiA',
-  Method = "POST",
-  Headers = {
-    ["Content-Type"] = "application/json"
-  },
-  Body = game:GetService("HttpService"):JSONEncode({
-    ["content"] = game.Players.LocalPlayer.Name..' '..'Executed!!'
-  })
-})
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
-ScreenGui.Parent = CoreGui;
+local InputService = game:GetService('UserInputService');
+local TextService = game:GetService('TextService');
+local CoreGui = game:GetService('CoreGui');
+local Teams = game:GetService('Teams');
+local Players = game:GetService('Players');
+local RunService = game:GetService('RunService')
+local TweenService = game:GetService('TweenService');
+local RenderStepped = RunService.RenderStepped;
+local LocalPlayer = Players.LocalPlayer;
+local Mouse = LocalPlayer:GetMouse();
+
+local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
+
+local ScreenGui = Instance.new('ScreenGui');
+ProtectGui(ScreenGui);
 
 local Toggles = {};
 local Options = {};
