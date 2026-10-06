@@ -2,7 +2,6 @@ local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
 local Teams = game:GetService('Teams');
-
 local Players = game:GetService('Players');
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService');
@@ -3114,26 +3113,29 @@ function Library:CreateWindow(...)
 
         local LeftSide = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0.5, -12, 1, -14);
-            Position = UDim2.new(0, 7, 0, 7);
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 8 - 1, 0, 8 - 1);
+            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
             CanvasSize = UDim2.new(0, 0, 0, 0);
-            ScrollingDirection = Enum.ScrollingDirection.Y;
-            AutomaticCanvasSize = Enum.AutomaticSize.Y;  -- if supported
-            ScrollBarThickness = 4;
-            ...
-        });
-        
-        local RightSide = Library:Create('ScrollingFrame', {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(0.5, -12, 1, -14);
-            Position = UDim2.new(0.5, 7, 0, 7);
-            CanvasSize = UDim2.new(0, 0, 0, 0);
-            ScrollingDirection = Enum.ScrollingDirection.Y;
-            AutomaticCanvasSize = Enum.AutomaticSize.Y;
-            ScrollBarThickness = 4;
-            ...
+            BottomImage = '';
+            TopImage = '';
+            ScrollBarThickness = 0;
+            ZIndex = 2;
+            Parent = TabFrame;
         });
 
+        local RightSide = Library:Create('ScrollingFrame', {
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0.5, 4 + 1, 0, 8 - 1);
+            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
+            CanvasSize = UDim2.new(0, 0, 0, 0);
+            BottomImage = '';
+            TopImage = '';
+            ScrollBarThickness = 0;
+            ZIndex = 2;
+            Parent = TabFrame;
+        });
 
         Library:Create('UIListLayout', {
             Padding = UDim.new(0, 8);
@@ -3152,12 +3154,9 @@ function Library:CreateWindow(...)
         });
 
         for _, Side in next, { LeftSide, RightSide } do
-            local ListLayout = Side:WaitForChild('UIListLayout', 5);
-            if ListLayout then
-                ListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-                    Side.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y);
-                end);
-            end
+            Side:WaitForChild('UIListLayout'):GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+                Side.CanvasSize = UDim2.fromOffset(0, Side.UIListLayout.AbsoluteContentSize.Y);
+            end);
         end;
 
         function Tab:ShowTab()
@@ -3252,19 +3251,15 @@ function Library:CreateWindow(...)
 
             function Groupbox:Resize()
                 local Size = 0;
+
                 for _, Element in next, Groupbox.Container:GetChildren() do
                     if (not Element:IsA('UIListLayout')) and Element.Visible then
                         Size = Size + Element.Size.Y.Offset;
                     end;
                 end;
-            
-                local ContentHeight = 20 + Size + 2 + 2;
-                local ParentHeight = Groupbox.BoxOuter.Parent and Groupbox.BoxOuter.Parent.AbsoluteSize.Y or ContentHeight;
-            
-                -- clamp so the box never exceeds the scroll area
-                BoxOuter.Size = UDim2.new(1, 0, 0, math.min(ContentHeight, ParentHeight));
-            end
 
+                BoxOuter.Size = UDim2.new(1, 0, 0, 20 + Size + 2 + 2);
+            end;
 
             Groupbox.Container = Container;
             setmetatable(Groupbox, BaseGroupbox);
