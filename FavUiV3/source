@@ -3891,6 +3891,7 @@ getgenv().wfuncs = {
     		end
     	end
     end
+    lp = game.Players.LocalPlayer
 }
 
 Library.wfuncs = wfuncs
