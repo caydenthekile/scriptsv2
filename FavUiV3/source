@@ -3881,6 +3881,16 @@ getgenv().wfuncs = {
               })
           })
      end
+    unpacker = function(data,count)
+    	if type(data) == "table" then
+    		for i,v in next,data do
+    			print(i,v,count)
+    			if type(v) == 'table' then
+    				unpacker(v,count+1)
+    			end
+    		end
+    	end
+    end
 }
 
 Library.wfuncs = wfuncs
