@@ -257,3 +257,4 @@ local wfuncs = {
     end,
     lp = game.Players.LocalPlayer
 }
+return wfuncs
