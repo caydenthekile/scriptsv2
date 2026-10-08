@@ -19,7 +19,7 @@ function wfuncs:nc(val)
     local newvel = Instance.new('BodyVelocity')
     newvel.Name = 'idkkkk'
     newvel.Velocity = Vector3.new(0, 0, 0)
-    if self:isalivecheck() then
+    if wfuncs:isalivecheck() then
         if val then
             if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
                 newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
@@ -35,16 +35,16 @@ function wfuncs:nc(val)
 end
 function wfuncs:getdist(part)
     local dist
-    if self:isalivecheck() then
-        if self:getroot() then
-            dist = (self:getroot().Position - part.Position).Magnitude
+    if wfuncs:isalivecheck() then
+        if wfuncs:getroot() then
+            dist = (wfuncs:getroot().Position - part.Position).Magnitude
         end
     end
     return dist
 end
 function wfuncs:tp(place)
-    if self:isalivecheck() then
-        self:getroot().Position = place.Position
+    if wfuncs:isalivecheck() then
+        wfuncs:getroot().Position = place.Position
     end
 end
 function wfuncs:generateNumbers(count)
@@ -59,11 +59,11 @@ function wfuncs:generateNumbers(count)
     return numbers
 end
 function wfuncs:tpsafe(place, s, div)
-    if self:isalivecheck() then
+    if wfuncs:isalivecheck() then
         local speed = s or 0
         local count = div or 10
-        local amt = self:generateNumbers(count)
-        local start = self:getroot().Position
+        local amt = wfuncs:generateNumbers(count)
+        local start = wfuncs:getroot().Position
         local endPos = place.Position
         local totalDistance = (endPos - start).Magnitude
         for i, v in ipairs(amt) do
@@ -73,8 +73,8 @@ function wfuncs:tpsafe(place, s, div)
             else
                 spot = start:Lerp(endPos, v)
             end
-            self:nc(true)
-            self:getroot().CFrame = CFrame.new(spot)
+            wfuncs:nc(true)
+            wfuncs:getroot().CFrame = CFrame.new(spot)
             wait(speed)
             local currentDistance = (spot - start).Magnitude
             if currentDistance >= totalDistance then
@@ -85,7 +85,7 @@ function wfuncs:tpsafe(place, s, div)
 end
 function wfuncs:espadd(item, name, toggle, color)
     if item.ClassName == 'Model' then
-        local dist = (self:getroot().Position - item:GetModelCFrame().Position).Magnitude
+        local dist = (wfuncs:getroot().Position - item:GetModelCFrame().Position).Magnitude
         local spot, vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
         local esp = {}
         esp.name = Drawing.new('Text')
@@ -122,7 +122,7 @@ function wfuncs:espadd(item, name, toggle, color)
                     esp.distance:Remove()
                     task.cancel(threads.espthread2)
                 end
-                local distt = (self:getroot().Position - item:GetModelCFrame().Position).Magnitude
+                local distt = (wfuncs:getroot().Position - item:GetModelCFrame().Position).Magnitude
                 local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
                 if viss then
                     setrenderproperty(esp.distance, "Visible", WoUStuff[toggle])
@@ -137,7 +137,7 @@ function wfuncs:espadd(item, name, toggle, color)
         table.insert(threads, espthread1)
         table.insert(threads, espthread2)
     elseif item.ClassName == 'Part' then
-        local dist = (self:getroot().Position - item.Position).Magnitude
+        local dist = (wfuncs:getroot().Position - item.Position).Magnitude
         local spot = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
         local esp = {}
         esp.name = Drawing.new('Text')
@@ -174,7 +174,7 @@ function wfuncs:espadd(item, name, toggle, color)
                     esp.distance:Remove()
                     task.cancel(threads.espthread4)
                 end
-                local distt = (self:getroot().Position - item.Position).Magnitude
+                local distt = (wfuncs:getroot().Position - item.Position).Magnitude
                 local spott, viss = workspace.CurrentCamera:WorldToViewportPoint(item.Position)
                 if viss then
                     setrenderproperty(esp.distance, "Visible", WoUStuff[toggle])
@@ -206,10 +206,10 @@ function wfuncs:servhop()
             game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servs[math.random(1, #servs)], game.Players.LocalPlayer)
         end)
         if not worked then
-            self:servhop()
+            wfuncs:servhop()
         end
     else
-        self:servhop()
+        wfuncs:servhop()
     end
 end
 function wfuncs:getroot()
@@ -224,7 +224,7 @@ function wfuncs:rj()
         game:GetService('TeleportService'):Teleport(game.PlaceId, ply)
     end)
     if not worked then
-        self:rj()
+        wfuncs:rj()
     end
 end
 function wfuncs:send(what, where)
@@ -244,7 +244,7 @@ function wfuncs:unpacker(data, count)
         for i, v in next, data do
             print(i, v, count)
             if type(v) == 'table' then
-                self:unpacker(v, count + 1)
+                wfuncs:unpacker(v, count + 1)
             end
         end
     end
