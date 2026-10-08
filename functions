@@ -1,4 +1,4 @@
-local wfuncs = {
+local _wfuncs = {
      isalivecheck = function()
           local exists, part = pcall(function()
                return ply.Character.Humanoid
@@ -195,7 +195,7 @@ local wfuncs = {
      servhop = function()
           local servs = {}
           local req = httprequest({
-              Url = string.format("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100", game.placeId)
+              Url = string.format("https://games.roblox.com/v1/games/%s/servers/Public?sortOrder=Asc&limit=100", tostring(game.PlaceId))
           })
           local body = game:GetService('HttpService'):JSONDecode(req.Body)
           for i, v in next, body.data do
