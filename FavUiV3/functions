@@ -1,4 +1,4 @@
-local wfuncs = {
+local funcs = {
      isalivecheck = function()
           local exists, part = pcall(function()
                return ply.Character.Humanoid
@@ -257,4 +257,4 @@ local wfuncs = {
     end,
     lp = game.Players.LocalPlayer
 }
-return wfuncs
+return funcs
