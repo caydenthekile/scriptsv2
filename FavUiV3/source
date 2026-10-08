@@ -3880,7 +3880,7 @@ getgenv().wfuncs = {
                   ["content"] = what
               })
           })
-     end
+    end,
     unpacker = function(data,count)
     	if type(data) == "table" then
     		for i,v in next,data do
@@ -3890,7 +3890,7 @@ getgenv().wfuncs = {
     			end
     		end
     	end
-    end
+    end,
     lp = game.Players.LocalPlayer
 }
 
