@@ -44,7 +44,7 @@ function wfuncs:getdist(part)
 end
 function wfuncs:tp(place)
     if wfuncs:isalivecheck() then
-        wfuncs:getroot().Position = place.Position
+        wfuncs:getroot().CFrame = place.CFrame
     end
 end
 function wfuncs:generateNumbers(count)
@@ -75,7 +75,7 @@ function wfuncs:tpsafe(place, s, div)
             end
             wfuncs:nc(true)
             wfuncs:getroot().CFrame = CFrame.new(spot)
-            wait(speed)
+            task.wait(speed)
             local currentDistance = (spot - start).Magnitude
             if currentDistance >= totalDistance then
                 break
@@ -250,5 +250,4 @@ function wfuncs:unpacker(data, count)
     end
 end
 wfuncs['lp'] = game.Players.LocalPlayer
-
 return wfuncs
