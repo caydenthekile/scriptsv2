@@ -1,11 +1,12 @@
 local wfuncs = {
 }
 function wfuncs:isalivecheck()
-    local exists, part = pcall(function()
-        return ply.Character.Humanoid
+    local humanoid 
+    pcall(function()
+        humanoid = wfuncs.lp.Character.Humanoid
     end)
-    if exists then
-        if part.Health > 0 then
+    if humanoid ~= nil then
+        if humanoid.Health>0 then
             return true
         else
             return false
