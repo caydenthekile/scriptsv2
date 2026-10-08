@@ -43,7 +43,7 @@ function wfuncs:getdist(part)
     return dist
 end
 function wfuncs:tp(place)
-    if ply.Character then
+    if self:isalivecheck() then
         self:getroot().Position = place.Position
     end
 end
