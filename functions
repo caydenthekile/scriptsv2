@@ -1,4 +1,4 @@
-getgenv().funcs = {
+getgenv().wfuncs = {
      isalivecheck = function()
           local exists, part = pcall(function()
                return ply.Character.Humanoid
@@ -244,5 +244,16 @@ getgenv().funcs = {
                   ["content"] = what
               })
           })
-     end
+    end,
+    unpacker = function(data,count)
+    	if type(data) == "table" then
+    		for i,v in next,data do
+    			print(i,v,count)
+    			if type(v) == 'table' then
+    				unpacker(v,count+1)
+    			end
+    		end
+    	end
+    end,
+    lp = game.Players.LocalPlayer
 }
