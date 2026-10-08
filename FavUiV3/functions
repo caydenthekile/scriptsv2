@@ -213,13 +213,10 @@ function wfuncs:servhop()
     end
 end
 function wfuncs:getroot()
-    local worked, stuff = pcall(function()
-        return ply.Character.HumanoidRootPart
-    end)
-    if not worked then
-        return task.wait()
-    elseif worked then
-        return stuff
+    if wfuncs:isalivecheck() then
+        return wfuncs.lp.Character.HumanoidRootPart
+    else
+        task.wait()
     end
 end
 function wfuncs:rj()
