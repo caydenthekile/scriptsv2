@@ -228,7 +228,7 @@ function wfuncs:rj()
     end
 end
 function wfuncs:send(what, where)
-    httprequest({
+    request({
         Url = where,
         Method = "POST",
         Headers = {
