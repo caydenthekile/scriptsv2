@@ -249,5 +249,15 @@ function wfuncs:unpacker(data, count)
         end
     end
 end
+function wfuncs:click_button(button,time)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / 2, button.AbsolutePosition.Y + button.AbsoluteSize.Y * 2.5, 0, true, button, 1);
+    task.wait(time)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / 2, button.AbsolutePosition.Y + button.AbsoluteSize.Y * 2.5, 0, false, button, 1)
+end
+function wfuncs:send_key(key,time)
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,Enum.KeyCode[string.upper(key)],true,game)
+    task.wait(time)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false,Enum.KeyCode[string.upper(key)],true,game)
+end
 wfuncs['lp'] = game.Players.LocalPlayer
 return wfuncs
