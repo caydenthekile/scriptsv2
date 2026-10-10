@@ -42,9 +42,15 @@ function wfuncs:getdist(part)
     end
     return dist
 end
-function wfuncs:tp(place)
-    if wfuncs:isalivecheck() then
-        wfuncs:getroot().CFrame = place.CFrame
+function wfuncs:tp(place,alter)
+    if not atler then
+        if wfuncs:isalivecheck() then
+            self:getroot().CFrame = place.CFrame
+        end
+    else
+        if wfuncs:isalivecheck() then
+            self:getroot().CFrame = place.CFrame * alter
+        end
     end
 end
 function wfuncs:generateNumbers(count)
