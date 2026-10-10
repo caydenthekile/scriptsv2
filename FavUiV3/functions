@@ -249,10 +249,14 @@ function wfuncs:unpacker(data, count)
         end
     end
 end
-function wfuncs:click_button(button,time)
-    game:GetService("VirtualInputManager"):SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / 2, button.AbsolutePosition.Y + button.AbsoluteSize.Y * 2, 0, true, button, 1);
+function wfuncs:click_button(button,time,XAlter,YAlter)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / XAlter, button.AbsolutePosition.Y + button.AbsoluteSize.Y * YAlter, 0, true, button, 1);
     task.wait(time)
-    game:GetService("VirtualInputManager"):SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / 2, button.AbsolutePosition.Y + button.AbsoluteSize.Y * 2, 0, false, button, 1)
+    game:GetService("VirtualInputManager"):SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / XAlter, button.AbsolutePosition.Y + button.AbsoluteSize.Y * YAlter, 0, false, button, 1)
+end
+
+function wfuncs:move_mouse(button,XAlter,YAlter)
+    game:GetService("UserInputService"):CreateVirtualInput():SendMousePosition(Vector2.new(button.AbsolutePosition.X + button.AbsoluteSize.X / XAlter, button.AbsolutePosition.Y + button.AbsoluteSize.Y * YAlter))
 end
 function wfuncs:click_key(key,down_time)
     game:GetService("UserInputService"):CreateVirtualInput():SendKey(true,key,false)
