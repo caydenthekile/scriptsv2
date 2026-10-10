@@ -264,4 +264,24 @@ function wfuncs:click_key(key,down_time)
     game:GetService("UserInputService"):CreateVirtualInput():SendKey(false,key,false)
 end
 wfuncs['lp'] = game.Players.LocalPlayer
+function wfuncs:create_thread(code)
+    local func = code
+    local thread_data = {
+        thread = coroutine.create(func),
+    }
+    function thread_data:pause()
+        coroutine.close(self.thread)
+        self.thread = nil
+    end
+    function thread_data:resume()
+        if self.thread ~= nil then 
+            coroutine.resume(self.thread)
+        else
+            self.thread = coroutine.create(func)
+            coroutine.resume(self.thread)
+        end
+    end
+    return thread_data
+end
+
 return wfuncs
