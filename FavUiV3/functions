@@ -282,4 +282,12 @@ function wfuncs:create_thread(code)
     end
     return thread_data
 end
+function wfuncs:checkfor(path,name)
+    if not path:FindFirstChild(name) then
+        return false
+    else
+        return true
+    end
+end
+
 return wfuncs
