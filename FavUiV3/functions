@@ -267,7 +267,9 @@ function wfuncs:create_thread(code)
         thread = coroutine.create(func),
     }
     function thread_data:pause()
-        coroutine.close(self.thread)
+        if self.thread ~= nil then
+            coroutine.close(self.thread)
+        end
         self.thread = nil
     end
     function thread_data:resume()
