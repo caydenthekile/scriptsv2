@@ -213,11 +213,8 @@ function wfuncs:servhop()
     end
 end
 function wfuncs:getroot()
-    if wfuncs:isalivecheck() then
-        return wfuncs.lp.Character.HumanoidRootPart
-    else
-        task.wait()
-    end
+    repeat task.wait() until self:isalivecheck()
+    return self.lp.Character.HumanoidRootPart
 end
 function wfuncs:rj()
     local worked, err = pcall(function()
@@ -283,5 +280,4 @@ function wfuncs:create_thread(code)
     end
     return thread_data
 end
-
 return wfuncs
