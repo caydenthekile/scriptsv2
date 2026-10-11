@@ -21,11 +21,11 @@ function wfuncs:nc(val)
     newvel.Velocity = Vector3.new(0, 0, 0)
     if wfuncs:isalivecheck() then
         if val then
-            if not ply.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
+            if not self.lp.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
                 newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
             end
         elseif not val or val == nil then
-            for i, v in next, ply.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
+            for i, v in next, self.lp.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
                 if v.Name == newvel.Name then
                     v:Destroy()
                 end
