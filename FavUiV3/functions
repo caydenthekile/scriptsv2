@@ -22,7 +22,7 @@ function wfuncs:nc(val)
     if wfuncs:isalivecheck() then
         if val then
             if not self.lp.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
-                newvel.Parent = ply.Character:WaitForChild('HumanoidRootPart')
+                newvel.Parent = self.lp.Character:WaitForChild('HumanoidRootPart')
             end
         elseif not val or val == nil then
             for i, v in next, self.lp.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
