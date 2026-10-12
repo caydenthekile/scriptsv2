@@ -23,7 +23,7 @@ end
 function wfuncs:nc(val)
     local old_states = {}
     local vel = nil
-    vel = Instance.new('BodyVelocity',workspace)
+    vel = Instance.new("BodyVelocity",wfuncs:getroot())
     vel.Velocity = Vector3.new(0, 0, 0)
     vel.Name = "WoUVel"
     local nc_thread = wfuncs:create_thread(function()
