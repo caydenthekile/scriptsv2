@@ -298,7 +298,8 @@ wfuncs['lp'] = game.Players.LocalPlayer
 function wfuncs:create_thread(code)
     local func = code
     local state = {
-        running = true
+        running = true,
+        arg = nil
     }
     local thread_data = {
         thread = coroutine.create(function()
@@ -308,19 +309,16 @@ function wfuncs:create_thread(code)
     function thread_data:pause()
         if self.thread ~= nil then
             state.running = false
-            print(coroutine.status(self.thread))
             if coroutine.status(self.thread) == "suspended" then
                 coroutine.close(self.thread)
-                print("closed")
             else
                 thread_data:pause()
-                print('open running again')
             end
         end
-        print(self.thread)
         self.thread = nil
     end
-    function thread_data:resume()
+    function thread_data:resume(arg)
+        state.arg = arg
         if self.thread ~= nil then 
             if coroutine.status(self.thread) == 'dead' then
                 state.running = true
@@ -349,22 +347,26 @@ function wfuncs:checkfor(path,name)
         return true
     end
 end
-function wfuncs:watch_spawn(path, name, code)
+function wfuncs:watch_spawn(path, name, func)
+    local Connect = {}
     local function run(child)
-        local thread = self:create_thread(function()
-            code(child)
-        end)
-        thread:resume()
+        func(child)
     end
     for i, v in next, path:GetChildren() do
         if string.match(v.Name, name) then
             run(v)
         end
     end
-    path.ChildAdded:Connect(function(child)
+    Connect.connection = path.ChildAdded:Connect(function(child)
         if string.match(child.Name, name) then
             run(child)
         end
     end)
+    function Connect:Terminate()
+        if Connect.connection ~= nil then
+            Connect.connection:Disconnect()
+            Connect.connection = nil
+        end
+    end
 end
 return wfuncs
