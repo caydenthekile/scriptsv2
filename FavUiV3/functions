@@ -32,7 +32,9 @@ function wfuncs:nc(val)
             end
             if not wfuncs:isalivecheck() then return end
             if not wfuncs:checkfor(wfuncs.lp,"WoUVel") then
-                vel.Parent = wfuncs:getroot()
+                pcall(function(...)
+                    vel.Parent = wfuncs:getroot()
+                end)
             end
             for i,v in next,self:getchar():GetChildren() do
                 if v:IsA("Part") then
