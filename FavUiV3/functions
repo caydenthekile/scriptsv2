@@ -1,5 +1,4 @@
-local wfuncs = {
-}
+local wfuncs = {}
 function wfuncs:isalivecheck()
     local humanoid 
     pcall(function()
@@ -20,10 +19,11 @@ function wfuncs:getchar()
         return self.lp.Character
     end
 end
-function wfuncs:nc(val)
+function wfuncs:nc()
     local old_states = {}
-    local nc_thread = wfuncs:create_thread(function()
+    local nc_thread = wfuncs:create_thread(function(state)
         while true and task.wait() do
+            if not state.running then coroutine.yield();print("yielding") end
             if not wfuncs:isalivecheck() then return end
             if not wfuncs:checkfor(wfuncs:getroot(),"WoUVel") then
                 local vel = Instance.new('BodyVelocity',self:getroot())
@@ -50,12 +50,17 @@ function wfuncs:nc(val)
             end
         end
     end
-    if val then
+    local nc = {
+    }
+    function nc:Fire()
         nc_thread:resume()
-    else
+    end
+    function nc:Stop()
+        repeat task.wait() until wfuncs:isalivecheck()
         restore()
         nc_thread:pause()
     end
+    return nc
 end
 function wfuncs:getdist(part)
     local dist
@@ -103,7 +108,7 @@ function wfuncs:tpsafe(place, s, div)
             else
                 spot = start:Lerp(endPos, v)
             end
-            wfuncs:nc(true)
+            local nc = wfuncs:nc():Fire()
             wfuncs:getroot().CFrame = CFrame.new(spot)
             task.wait(speed)
             local currentDistance = (spot - start).Magnitude
@@ -308,26 +313,23 @@ function wfuncs:create_thread(code)
             if coroutine.status(self.thread) == "suspended" then
                 coroutine.close(self.thread)
             else
-                thread_data:pause()
+                coroutine.close(self.thread)
             end
         end
-        self.thread = nil
     end
     function thread_data:resume(arg)
         state.arg = arg
-        if self.thread ~= nil then 
+        state.running = true
+        if self.thread ~= nil then
             if coroutine.status(self.thread) == 'dead' then
-                state.running = true
                 self.thread = coroutine.create(function()
                     func(state)
                 end)
                 coroutine.resume(self.thread)
             else
-                state.running = true
                 coroutine.resume(self.thread)
             end
         else
-            state.running = true
             self.thread =  coroutine.create(function()
                 func(state)
             end)
@@ -369,10 +371,11 @@ function wfuncs:removed_signal(path,name,code)
     local connect
     connect = path.ChildRemoved:Connect(function(child)
         if child.Name == name then
-            connect:Disconnect()
             code(child)
+            pcall(function()
+                connect:Disconnect()
+            end)
         end
     end)
 end
-
 return wfuncs
