@@ -15,22 +15,50 @@ function wfuncs:isalivecheck()
         return false
     end
 end
+function wfuncs:getchar()
+    if self:isalivecheck() then
+        return self.lp.Character
+    end
+end
 function wfuncs:nc(val)
-    local newvel = Instance.new('BodyVelocity')
-    newvel.Name = 'idkkkk'
-    newvel.Velocity = Vector3.new(0, 0, 0)
-    if wfuncs:isalivecheck() then
-        if val then
-            if not self.lp.Character:WaitForChild('HumanoidRootPart'):FindFirstChild(newvel.Name) then
-                newvel.Parent = self.lp.Character:WaitForChild('HumanoidRootPart')
+    local old_states = {}
+    local vel = nil
+    local nc_thread = wfuncs:create_thread(function()
+        while true and task.wait() do
+            if vel == nil then
+                vel = Instance.new('BodyVelocity')
+                vel.Velocity = Vector3.new(0, 0, 0)
+                vel.Name = "WoUVel"
             end
-        elseif not val or val == nil then
-            for i, v in next, self.lp.Character:WaitForChild('HumanoidRootPart'):GetChildren() do
-                if v.Name == newvel.Name then
-                    v:Destroy()
+            if not wfuncs:isalivecheck() then return end
+            if not wfuncs:checkfor(wfuncs.lp,"WoUVel") then
+                vel.Parent = wfuncs:getroot()
+            end
+            for i,v in next,self:getchar():GetChildren() do
+                if v:IsA("Part") then
+                    old_states[v.Name] = v.CanCollide
+                    v.CanCollide = false
                 end
             end
         end
+    end)
+    local function restore()
+        for i,v in next,self:getroot():GetChildren() do
+            if v.Name == "WoUVel" then
+                v:Destroy()
+            end
+        end
+        for i,v in next,self:getchar():GetChildren() do
+            if v:IsA("Part") then
+                v.CanCollide = old_states[v.Name]
+            end
+        end
+    end
+    if val then
+        nc_thread:resume()
+    else
+        restore()
+        nc_thread:pause()
     end
 end
 function wfuncs:getdist(part)
@@ -269,20 +297,46 @@ end
 wfuncs['lp'] = game.Players.LocalPlayer
 function wfuncs:create_thread(code)
     local func = code
+    local state = {
+        running = true
+    }
     local thread_data = {
-        thread = coroutine.create(func),
+        thread = coroutine.create(function()
+            func(state)
+        end)
     }
     function thread_data:pause()
         if self.thread ~= nil then
-            coroutine.close(self.thread)
+            state.running = false
+            print(coroutine.status(self.thread))
+            if coroutine.status(self.thread) == "suspended" then
+                coroutine.close(self.thread)
+                print("closed")
+            else
+                thread_data:pause()
+                print('open running again')
+            end
         end
+        print(self.thread)
         self.thread = nil
     end
     function thread_data:resume()
         if self.thread ~= nil then 
-            coroutine.resume(self.thread)
+            if coroutine.status(self.thread) == 'dead' then
+                state.running = true
+                self.thread = coroutine.create(function()
+                    func(state)
+                end)
+                coroutine.resume(self.thread)
+            else
+                state.running = true
+                coroutine.resume(self.thread)
+            end
         else
-            self.thread = coroutine.create(func)
+            state.running = true
+            self.thread =  coroutine.create(function()
+                func(state)
+            end)
             coroutine.resume(self.thread)
         end
     end
@@ -295,5 +349,22 @@ function wfuncs:checkfor(path,name)
         return true
     end
 end
-
+function wfuncs:watch_spawn(path, name, code)
+    local function run(child)
+        local thread = self:create_thread(function()
+            code(child)
+        end)
+        thread:resume()
+    end
+    for i, v in next, path:GetChildren() do
+        if string.match(v.Name, name) then
+            run(v)
+        end
+    end
+    path.ChildAdded:Connect(function(child)
+        if string.match(child.Name, name) then
+            run(child)
+        end
+    end)
+end
 return wfuncs
