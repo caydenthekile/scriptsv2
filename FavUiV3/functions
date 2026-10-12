@@ -23,6 +23,9 @@ end
 function wfuncs:nc(val)
     local old_states = {}
     local vel = nil
+    vel = Instance.new('BodyVelocity')
+    vel.Velocity = Vector3.new(0, 0, 0)
+    vel.Name = "WoUVel"
     local nc_thread = wfuncs:create_thread(function()
         while true and task.wait() do
             if vel == nil then
@@ -32,9 +35,7 @@ function wfuncs:nc(val)
             end
             if not wfuncs:isalivecheck() then return end
             if not wfuncs:checkfor(wfuncs.lp,"WoUVel") then
-                pcall(function(...)
-                    vel.Parent = wfuncs:getroot()
-                end)
+                vel.Parent = wfuncs:getroot()
             end
             for i,v in next,self:getchar():GetChildren() do
                 if v:IsA("Part") then
