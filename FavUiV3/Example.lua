@@ -7,7 +7,7 @@ local Window = Library:CreateWindow({
 	-- Set AutoShow to true if you want the menu to appear when it is created
 	-- Position and Size are also valid options here
 
-	Size = UDim2.new(0.3,0,0.38,0),
+	Size = UDim2.fromScale(0.3,0.5),
 	Title = 'Example menu',
 	Center = false,
 	AutoShow = true,
@@ -63,13 +63,13 @@ LeftGroupBox:AddToggle('SpellSpamToggle', {
 -- To get the state of the toggle you do toggle.Value
 
 -- Calls the passed function when the toggle is updated
-Toggles.MyToggle:OnChanged(function()
+Toggles.SpellSpamToggle:OnChanged(function()
 -- here we get our toggle object & then get its value
-	print('MyToggle changed to:', Toggles.MyToggle.Value)
+	print('MyToggle changed to:', Toggles.SpellSpamToggle.Value)
 end)
 
 -- This should print to the console: "My toggle state changed! New value: false"
-Toggles.MyToggle:SetValue(false)
+Toggles.SpellSpamToggle:SetValue(false)
 
 -- 1/15/23
 -- Deprecated old way of creating buttons in favor of using a table
