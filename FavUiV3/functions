@@ -15,8 +15,8 @@ function wfuncs:isalivecheck()
     end
 end
 function wfuncs:getchar()
-    if self:isalivecheck() then
-        return self.lp.Character
+    if wfuncs:isalivecheck() then
+        return wfuncs.lp.Character
     end
 end
 function wfuncs:nc()
@@ -26,11 +26,11 @@ function wfuncs:nc()
             if not state.running then coroutine.yield();print("yielding") end
             if not wfuncs:isalivecheck() then return end
             if not wfuncs:checkfor(wfuncs:getroot(),"WoUVel") then
-                local vel = Instance.new('BodyVelocity',self:getroot())
+                local vel = Instance.new('BodyVelocity',wfuncs:getroot())
                 vel.Velocity = Vector3.new(0, 0, 0)
                 vel.Name = "WoUVel"
             end
-            for i,v in next,self:getchar():GetChildren() do
+            for i,v in next,wfuncs:getchar():GetChildren() do
                 if v:IsA("Part") then
                     old_states[v.Name] = v.CanCollide
                     v.CanCollide = false
@@ -39,12 +39,12 @@ function wfuncs:nc()
         end
     end)
     local function restore()
-        for i,v in next,self:getroot():GetChildren() do
+        for i,v in next,wfuncs:getroot():GetChildren() do
             if v.Name == "WoUVel" then
                 v:Destroy()
             end
         end
-        for i,v in next,self:getchar():GetChildren() do
+        for i,v in next,wfuncs:getchar():GetChildren() do
             if v:IsA("Part") then
                 v.CanCollide = old_states[v.Name]
             end
@@ -74,11 +74,11 @@ end
 function wfuncs:tp(place,alter)
     if not atler then
         if wfuncs:isalivecheck() then
-            self:getroot().CFrame = place.CFrame
+            wfuncs:getroot().CFrame = place.CFrame
         end
     else
         if wfuncs:isalivecheck() then
-            self:getroot().CFrame = place.CFrame * alter
+            wfuncs:getroot().CFrame = place.CFrame * alter
         end
     end
 end
@@ -108,7 +108,7 @@ function wfuncs:tpsafe(place, s, div)
             else
                 spot = start:Lerp(endPos, v)
             end
-            local nc = wfuncs:nc():Fire()
+            wfuncs:nc():Fire()
             wfuncs:getroot().CFrame = CFrame.new(spot)
             task.wait(speed)
             local currentDistance = (spot - start).Magnitude
@@ -118,10 +118,11 @@ function wfuncs:tpsafe(place, s, div)
         end
     end
 end
+wfuncs.UIS = game:GetService("UserInputService")
 function wfuncs:espadd(item, name, toggle, color)
     if item.ClassName == 'Model' then
         local dist = (wfuncs:getroot().Position - item:GetModelCFrame().Position).Magnitude
-        local spot, vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
+        local spot, _vis = workspace.CurrentCamera:WorldToViewportPoint(item:GetModelCFrame().Position)
         local esp = {}
         esp.name = Drawing.new('Text')
         esp.name.Text = name
@@ -237,7 +238,7 @@ function wfuncs:servhop()
         end
     end
     if #servs > 0 then
-        local worked, code = pcall(function()
+        local worked, _code = pcall(function()
             game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, servs[math.random(1, #servs)], game.Players.LocalPlayer)
         end)
         if not worked then
@@ -248,11 +249,11 @@ function wfuncs:servhop()
     end
 end
 function wfuncs:getroot()
-    repeat task.wait() until self:isalivecheck()
-    return self.lp.Character.HumanoidRootPart
+    repeat task.wait() until wfuncs:isalivecheck()
+    return wfuncs.lp.Character.HumanoidRootPart
 end
 function wfuncs:rj()
-    local worked, err = pcall(function()
+    local worked, _err = pcall(function()
         game:GetService('TeleportService'):Teleport(game.PlaceId, ply)
     end)
     if not worked then
@@ -295,7 +296,7 @@ function wfuncs:click_key(key,down_time)
     task.wait(down_time)
     game:GetService("UserInputService"):CreateVirtualInput():SendKey(false,key,false)
 end
-wfuncs['lp'] = game.Players.LocalPlayer
+wfuncs.lp = game.Players.LocalPlayer
 function wfuncs:create_thread(code)
     local func = code
     local state = {
@@ -371,11 +372,80 @@ function wfuncs:removed_signal(path,name,code)
     local connect
     connect = path.ChildRemoved:Connect(function(child)
         if child.Name == name then
-            code(child)
             pcall(function()
-                connect:Disconnect()
+                code(child)
             end)
+            connect:Disconnect()
         end
     end)
 end
+function wfuncs:getclosest(tbl,part)
+    local far,one = math.huge,nil
+    repeat task.wait() until wfuncs:isalivecheck()
+    for i,v in next,tbl do
+        local dist
+        if part ~= "self" then 
+            dist = wfuncs:getdist(v:WaitForChild(part))
+        else
+            dist = wfuncs:getdist(v)
+        end
+        if dist < far then
+            far = dist
+            one = v
+        end
+    end
+    return one
+end
+-- function wfuncs:fly()
+--     local flight = {}
+--     local fly_thread = wfuncs:create_thread(function(state)
+--         local fly
+--         while true and task.wait() do
+--             if not state.running then coroutine.yield() end
+--             if not wfuncs:isalivecheck() then task.wait() end
+--             for i,v in next,wfuncs:getroot():GetChildren() do
+--                 if v.ClassName == "BodyVelocity" and v.Name ~= "WoUFly" then
+--                     v:Destroy()
+--                 end
+--             end
+--             if not wfuncs:checkfor(wfuncs:getroot(),"WoUFly") then
+--                 fly = Instance.new("BodyVelocity",wfuncs:getroot())
+--                 fly.Name = "WoUFly"
+--             else
+--                 local mult = state.arg
+--                 local cam = workspace.CurrentCamera
+--                 local X, Y, Z = 0, 0, 0
+--                 X = wfuncs:getchar():WaitForChild("Humanoid").MoveDirection.X * mult
+--                 Z = wfuncs:getchar():WaitForChild("Humanoid").MoveDirection.Y * mult
+--                 if wfuncs.UIS:IsKeyDown(Enum.KeyCode.LeftShift) then Y -= mult end
+--                 if wfuncs.UIS:IsKeyDown(Enum.KeyCode.Space) then Y += mult end
+
+--                 fly.Velocity = Vector3.new(X, Y, Z)
+--             end
+--         end
+--     end)
+--     function flight:Start(speed)
+--         fly_thread:resume(speed)
+--     end
+--     function flight:Stop()
+--         fly_thread:pause()
+--         for i,v in next,wfuncs:getroot():GetChildren() do
+--             if v.Name == "WoUFly" and v.ClassName == "BodyVelocity" then
+--                 v:Destroy()
+--             end
+--         end
+--     end
+--     return flight
+-- end
+
+
+-- local flight_thread = wfuncs:fly()
+
+-- flight_thread:Start(200)
+
+-- task.wait(10)
+
+-- flight_thread:Stop()
+
+
 return wfuncs
