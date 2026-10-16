@@ -32,7 +32,9 @@ function wfuncs:nc()
             end
             for i,v in next,wfuncs:getchar():GetChildren() do
                 if v:IsA("Part") then
-                    old_states[v.Name] = v.CanCollide
+                    if not old_states[v.Name] then
+                        old_states[v.Name] = v.CanCollide
+                    end
                     v.CanCollide = false
                 end
             end
@@ -48,6 +50,9 @@ function wfuncs:nc()
             if v:IsA("Part") then
                 v.CanCollide = old_states[v.Name]
             end
+        end
+        for i2,v2 in next,old_states do
+            print(i2,v2)
         end
     end
     local nc = {
@@ -446,6 +451,5 @@ end
 -- task.wait(10)
 
 -- flight_thread:Stop()
-
 
 return wfuncs
