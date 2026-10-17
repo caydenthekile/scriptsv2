@@ -1,4 +1,5 @@
 local wfuncs = {}
+
 function wfuncs:isalivecheck()
     local humanoid 
     pcall(function()
@@ -52,7 +53,6 @@ function wfuncs:nc()
             end
         end
         for i2,v2 in next,old_states do
-            print(i2,v2)
         end
     end
     local nc = {
