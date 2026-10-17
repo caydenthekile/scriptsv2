@@ -25,17 +25,12 @@ function Toggles:Halt()
         if type(v) == "table"  and i ~= "stored" then
             if v.Danger then
                 Toggles.stored[i] = v.Value
-                print(Toggles.stored[i],v.Value,'1')
                 v.Value = false
                 v:Display()
                 Library:SafeCallback(v.Callback,false)
                 Library:SafeCallback(v.Changed,false)
             end
         end
-        print("--------")
-    end
-    for i,v in next,Toggles.stored do
-        print(i,v)
     end
 end
 function Toggles:Resume()
