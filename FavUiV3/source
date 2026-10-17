@@ -17,7 +17,23 @@ ProtectGui(ScreenGui);
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
 ScreenGui.Parent = CoreGui;
 
-local Toggles = {};
+local Toggles = {
+    stored = {},
+};
+function Toggles:Halt()
+    for i,v in next,Toggles do
+        if v.Danger then
+            Toggles.stored[i] = v.Value
+            v:SetValue(false)
+        end
+    end
+end
+function Toggles:Resume()
+    for i,v in next,Toggles.stored do
+        Toggles[i]:SetValue(v)
+    end
+    Toggles.stored = {}
+end
 local Options = {};
 
 getgenv().Toggles = Toggles;
@@ -1820,7 +1836,7 @@ do
         local Toggle = {
             Value = Info.Default or false;
             Type = 'Toggle';
-
+            Danger = Info.Danger or false;
             Callback = Info.Callback or function(Value) end;
             Addons = {},
             Risky = Info.Risky,
@@ -1907,8 +1923,6 @@ do
         end;
 
         function Toggle:SetValue(Bool)
-            Bool = (not not Bool);
-
             Toggle.Value = Bool;
             Toggle:Display();
 
@@ -1918,7 +1932,11 @@ do
                     Addon:Update()
                 end
             end
-
+            for i,v in next,Toggles do
+                if v.Danger then
+                    v:SetValue(false)
+                end
+            end
             Library:SafeCallback(Toggle.Callback, Toggle.Value);
             Library:SafeCallback(Toggle.Changed, Toggle.Value);
             Library:UpdateDependencyBoxes();
