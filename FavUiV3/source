@@ -22,15 +22,29 @@ local Toggles = {
 };
 function Toggles:Halt()
     for i,v in next,Toggles do
-        if v.Danger then
-            Toggles.stored[i] = v.Value
-            v:SetValue(false)
+        if type(v) == "table"  and i ~= "stored" then
+            if v.Danger then
+                Toggles.stored[i] = v.Value
+                print(Toggles.stored[i],v.Value,'1')
+                v.Value = false
+                v:Display()
+                Library:SafeCallback(v.Callback,false)
+                Library:SafeCallback(v.Changed,false)
+            end
         end
+        print("--------")
+    end
+    for i,v in next,Toggles.stored do
+        print(i,v)
     end
 end
 function Toggles:Resume()
     for i,v in next,Toggles.stored do
-        Toggles[i]:SetValue(v)
+        local Toggle = Toggles[i]
+        Toggle.Value = v
+        Toggle:Display()
+        Library:SafeCallback(Toggle.Callback,false)
+        Library:SafeCallback(Toggle.Changed,false)
     end
     Toggles.stored = {}
 end
@@ -1933,8 +1947,13 @@ do
                 end
             end
             for i,v in next,Toggles do
-                if v.Danger then
-                    v:SetValue(false)
+                if type(v) == "table" and i ~= Idx then
+                    if v.Danger and v.Value then
+                        v.Value = false
+                        v:Display()
+                        Library:SafeCallback(v.Callback,false)
+                        Library:SafeCallback(v.Changed,false)
+                    end
                 end
             end
             Library:SafeCallback(Toggle.Callback, Toggle.Value);
@@ -3652,4 +3671,5 @@ Players.PlayerAdded:Connect(OnPlayerChange);
 Players.PlayerRemoving:Connect(OnPlayerChange);
 
 getgenv().Library = Library
+
 return Library
