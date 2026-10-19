@@ -22,7 +22,23 @@ function wfuncs:getchar()
 end
 function wfuncs:nc()
     local old_states = {}
-    local nc_thread = wfuncs:create_thread(function(state)
+    local function restore()
+        for i,v in next,wfuncs:getroot():GetChildren() do
+            if v.Name == "WoUVel" then
+                v:Destroy()
+            end
+        end
+        for i,v in next,wfuncs:getchar():GetChildren() do
+            if v:IsA("Part") then
+                v.CanCollide = old_states[v.Name]
+            end
+        end
+        for i2,v2 in next,old_states do
+        end
+    end
+    local tbl = {
+    }
+    tbl['thread'] = wfuncs:create_thread(function(state)
         while true and task.wait() do
             if not state.running then coroutine.yield();print("yielding") end
             if not wfuncs:isalivecheck() then return end
@@ -41,32 +57,15 @@ function wfuncs:nc()
             end
         end
     end)
-    local function restore()
-        for i,v in next,wfuncs:getroot():GetChildren() do
-            if v.Name == "WoUVel" then
-                v:Destroy()
-            end
-        end
-        for i,v in next,wfuncs:getchar():GetChildren() do
-            if v:IsA("Part") then
-                v.CanCollide = old_states[v.Name]
-            end
-        end
-        for i2,v2 in next,old_states do
-        end
+    function tbl:Fire()
+        tbl.thread:resume()
     end
-    local nc = {
-    }
-    nc['thread'] = nc_thread
-    function nc:Fire()
-        nc_thread:resume()
-    end
-    function nc:Stop()
+    function tbl:Stop()
         repeat task.wait() until wfuncs:isalivecheck()
         restore()
-        nc_thread:pause()
+        tbl.thread:pause()
     end
-    return nc
+    return tbl
 end
 function wfuncs:getdist(part)
     local dist
@@ -349,6 +348,9 @@ function wfuncs:create_thread(code)
             end)
             coroutine.resume(self.thread)
         end
+    end
+    function thread_data:status()
+        return coroutine.status(thread_data.thread)
     end
     return thread_data
 end
