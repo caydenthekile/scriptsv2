@@ -294,9 +294,9 @@ function wfuncs:mouse_click(button,time,XAlter,YAlter)
         task.wait(time)
         VIM:SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / XAlter, button.AbsolutePosition.Y + button.AbsoluteSize.Y * YAlter, 0, false, button, 1)
     else
-        VIM:SendMouseButtonEvent(button.X,button.Y, 0, true, button, 1);
+        VIM:SendMouseButtonEvent(button.X,button.Y, 0, true, game, 1);
         task.wait(time)
-        VIM:SendMouseButtonEvent(button.X,button.Y, 0, false, button, 1)
+        VIM:SendMouseButtonEvent(button.X,button.Y, 0, false, game, 1)
     end
 end
 
