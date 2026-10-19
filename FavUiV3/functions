@@ -359,7 +359,7 @@ function wfuncs:checkfor(path,name)
     end
 end
 function wfuncs:watch_spawn(path, name, func)
-    local Connect = {}
+    local Connect
     local function run(child)
         func(child)
     end
@@ -368,17 +368,12 @@ function wfuncs:watch_spawn(path, name, func)
             run(v)
         end
     end
-    Connect.connection = path.ChildAdded:Connect(function(child)
+    Connect = path.ChildAdded:Connect(function(child)
         if string.match(child.Name, name) then
             run(child)
         end
     end)
-    function Connect:Terminate()
-        if Connect.connection ~= nil then
-            Connect.connection:Disconnect()
-            Connect.connection = nil
-        end
-    end
+    return Connect
 end
 function wfuncs:removed_signal(path,name,code)
     local connect
