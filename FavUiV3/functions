@@ -297,6 +297,7 @@ function wfuncs:mouse_click(button,time,XAlter,YAlter)
         VIM:SendMouseButtonEvent(button.X,button.Y, 0, true, button, 1);
         task.wait(time)
         VIM:SendMouseButtonEvent(button.X,button.Y, 0, false, button, 1)
+    end
 end
 
 function wfuncs:move_mouse(button,XAlter,YAlter)
