@@ -57,6 +57,7 @@ function wfuncs:nc()
     end
     local nc = {
     }
+    nc['thread'] = nc_thread
     function nc:Fire()
         nc_thread:resume()
     end
