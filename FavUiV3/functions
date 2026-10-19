@@ -38,7 +38,7 @@ function wfuncs:nc()
     end
     local tbl = {
     }
-    tbl['thread'] = wfuncs:create_thread(function(state)
+    tbl.thread = wfuncs:create_thread(function(state)
         while true and task.wait() do
             if not state.running then coroutine.yield();print("yielding") end
             if not wfuncs:isalivecheck() then return end
@@ -58,7 +58,7 @@ function wfuncs:nc()
         end
     end)
     function tbl:Status()
-        if coroutine.status(tbl.thread) == 'running' then
+        if tbl.thread:status() == 'running' then
             return true
         else
             return false
