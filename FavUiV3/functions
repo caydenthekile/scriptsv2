@@ -40,7 +40,7 @@ function wfuncs:nc()
     }
     tbl['thread'] = wfuncs:create_thread(function(state)
         while true and task.wait() do
-            if not state.running then coroutine.yield();print("yielding") end
+            if not state.running then coroutine.yield() end
             if not wfuncs:isalivecheck() then return end
             if not wfuncs:checkfor(wfuncs:getroot(),"WoUVel") then
                 local vel = Instance.new('BodyVelocity',wfuncs:getroot())
